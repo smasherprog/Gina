@@ -1,0 +1,4291 @@
+<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:extToolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit/extended"
+	xmlns:shared="clr-namespace:WPFShared;assembly=WPFShared"
+	xmlns:biz="clr-namespace:GimaSoft.Business.GINA;assembly=GimaSoft.Business.GINA"
+	xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+	xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras.WPF4"
+	xmlns:sys="clr-namespace:System;assembly=mscorlib"
+	xmlns:local="clr-namespace:GimaSoft.GINA">
+	<ResourceDictionary.MergedDictionaries>
+		<ResourceDictionary
+			Source="pack://application:,,,/SharedResources.xaml" />
+	</ResourceDictionary.MergedDictionaries>
+	<shared:EnumDisplayConverter
+		x:Key="TimerStartBehaviors"
+		Type="{x:Type biz:TimerStartBehaviors}" />
+	<shared:EnumDisplayConverter
+		x:Key="TimerTypes"
+		Type="{x:Type biz:TimerTypes}" />
+	<shared:EnumDisplayConverter
+		x:Key="ArchiveMethods"
+		Type="{x:Type biz:ArchiveMethods}" />
+	<shared:EnumDisplayConverter
+		x:Key="ArchiveSchedules"
+		Type="{x:Type biz:ArchiveSchedules}" />
+	<Style
+		x:Key="{x:Type local:TriggerEditor}"
+		TargetType="{x:Type local:TriggerEditor}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:TriggerEditor}">
+					<Grid>
+						<shared:DialogEditor
+							Title="Trigger Editor"
+							ShowDialogAlignButtons="True"
+							DialogMargin="0 20 0 0"
+							Visibility="{TemplateBinding UIElement.Visibility}"
+							VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+							<Grid
+								HorizontalAlignment="Stretch"
+								Width="500">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<GroupBox
+									Margin="0 3 0 5"
+									Grid.Row="0">
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="General Settings"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="Auto" />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition />
+										</Grid.ColumnDefinitions>
+										<Grid.RowDefinitions>
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+										</Grid.RowDefinitions>
+										<Label
+											Content="Trigger Name"
+											Grid.Row="0"
+											Grid.Column="0" />
+										<TextBox
+											Name="tbTriggerName"
+											Grid.Row="0"
+											Grid.Column="2"
+											Text="{Binding Path=TriggerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Search Text"
+											Grid.Row="2"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="2"
+											Grid.Column="2"
+											Text="{Binding Path=TriggerText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
+										<StackPanel
+											Orientation="Horizontal"
+											Grid.Row="4"
+											Grid.Column="0"
+											Grid.ColumnSpan="3">
+											<CheckBox
+												Margin="0 0 20 0"
+												IsChecked="{Binding Path=EnableRegex, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+												IsEnabled="{Binding Path=UsingTokens, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanNegate}}">
+												<Label
+													Content="Use Regular Expressions" />
+											</CheckBox>
+											<CheckBox
+												IsChecked="{Binding Path=UseFastCheck, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+												IsEnabled="{Binding Path=EnableRegex, RelativeSource={RelativeSource TemplatedParent}}"
+												Tag="{Binding RelativeSource={RelativeSource Self}}"
+												DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type local:TriggerEditor}}}">
+												<Label
+													Content="Use Fast Check" />
+												<FrameworkElement.ToolTip>
+													<ToolTip
+														DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+														<StackPanel
+															Grid.Row="3">
+															<TextBlock
+																FontWeight="Bold"
+																Foreground="#FFFF0000"
+																Text="Fast Check is disabled."
+																Visibility="{Binding Path=UseFastCheck, ConverterParameter=collapsed, Converter={StaticResource ConverterBooleanToVisibility}}" />
+															<TextBlock
+																FontWeight="Bold"
+																Foreground="#FF8B0000"
+																Text="Effective Digest by Character:"
+																Visibility="{Binding Path=UseFastCheck, Converter={StaticResource ConverterBooleanToVisibility}}" />
+															<DataGrid
+																AutoGenerateColumns="False"
+																CanUserAddRows="False"
+																CanUserDeleteRows="False"
+																CanUserSortColumns="False"
+																IsReadOnly="True"
+																VerticalScrollBarVisibility="Auto"
+																ItemsSource="{Binding Path=MatchHelpers, RelativeSource={RelativeSource TemplatedParent}}"
+																Visibility="{Binding Path=UseFastCheck, Converter={StaticResource ConverterBooleanToVisibility}}">
+																<DataGrid.Columns>
+																	<DataGridTextColumn
+																		Header="Character"
+																		Binding="{Binding Path=Character.DisplayName}" />
+																	<DataGridTextColumn
+																		Header="Digest"
+																		Width="*"
+																		Binding="{Binding Path=RegExpPreview}" />
+																</DataGrid.Columns>
+															</DataGrid>
+														</StackPanel>
+													</ToolTip>
+												</FrameworkElement.ToolTip>
+											</CheckBox>
+										</StackPanel>
+										<Label
+											Content="Category"
+											Grid.Row="6"
+											Grid.Column="0" />
+										<ComboBox
+											DisplayMemberPath="Name"
+											Grid.Row="6"
+											Grid.Column="2"
+											ItemsSource="{Binding Path=TriggerCategories, RelativeSource={RelativeSource TemplatedParent}}"
+											SelectedValue="{Binding Path=Category, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Comments"
+											VerticalAlignment="Bottom"
+											Margin="0 0 0 18"
+											Grid.Row="8"
+											Grid.Column="0" />
+										<TextBox
+											TextWrapping="Wrap"
+											Height="36"
+											Grid.Row="8"
+											Grid.Column="2"
+											Text="{Binding Path=Comments, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									</Grid>
+								</GroupBox>
+								<TabControl
+									Background="#00FFFFFF"
+									HorizontalAlignment="Stretch"
+									VerticalContentAlignment="Top"
+									VerticalAlignment="Top"
+									Height="370"
+									Margin="0 0 0 10"
+									Grid.Row="1">
+									<TabItem>
+										<HeaderedContentControl.Header>
+											<TextBlock
+												Text="Basic"
+												FontWeight="Bold" />
+										</HeaderedContentControl.Header>
+										<local:TriggerNotificationEditor
+											x:Name="MainTriggerEditor" />
+									</TabItem>
+									<TabItem>
+										<HeaderedContentControl.Header>
+											<TextBlock
+												Text="Timer"
+												FontWeight="Bold" />
+										</HeaderedContentControl.Header>
+										<StackPanel
+											HorizontalAlignment="Stretch">
+											<Grid>
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition
+														Width="Auto" />
+													<ColumnDefinition
+														Width="5" />
+													<ColumnDefinition />
+												</Grid.ColumnDefinitions>
+												<Grid.RowDefinitions>
+													<RowDefinition />
+													<RowDefinition
+														Height="5" />
+													<RowDefinition />
+													<RowDefinition
+														Height="5" />
+													<RowDefinition />
+													<RowDefinition
+														Height="5" />
+													<RowDefinition />
+													<RowDefinition
+														Height="5" />
+													<RowDefinition />
+													<RowDefinition
+														Height="5" />
+													<RowDefinition />
+													<RowDefinition />
+												</Grid.RowDefinitions>
+												<Label
+													Content="Timer Type"
+													Grid.Row="0"
+													Grid.Column="0" />
+												<ComboBox
+													Grid.Row="0"
+													Grid.Column="2"
+													Width="150"
+													ItemsSource="{Binding Path=DisplayNames, Source={StaticResource TimerTypes}}"
+													SelectedValue="{Binding Path=TimerType, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TimerTypes}}" />
+												<Label
+													Content="Timer Name"
+													Grid.Row="2"
+													Grid.Column="0"
+													IsEnabled="{Binding Path=TimerEnabled, RelativeSource={RelativeSource TemplatedParent}}" />
+												<TextBox
+													Grid.Row="2"
+													Grid.Column="2"
+													Text="{Binding Path=TimerName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+													IsEnabled="{Binding Path=TimerEnabled, RelativeSource={RelativeSource TemplatedParent}}" />
+												<Label
+													Content="Timer Duration"
+													Grid.Row="4"
+													Grid.Column="0"
+													IsEnabled="{Binding Path=TimerCountsDown, RelativeSource={RelativeSource TemplatedParent}}" />
+												<shared:TimeSpanPicker
+													Granularity="millisecond"
+													MaxTimeSpanInSeconds="86400"
+													Grid.Row="4"
+													Grid.Column="2"
+													Value="{Binding Path=TimerMillisecondDuration, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+													IsEnabled="{Binding Path=TimerCountsDown, RelativeSource={RelativeSource TemplatedParent}}"
+													Visibility="{Binding Path=UseTimerSpan, ConverterParameter=collapsed, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}" />
+												<Label
+													Content="(Using dynamic time span from matched {TS} tag)"
+													IsEnabled="False"
+													Grid.Row="4"
+													Grid.Column="2"
+													Visibility="{Binding Path=UseTimerSpan, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}" />
+												<StackPanel
+													Orientation="Horizontal"
+													Grid.Row="6"
+													Grid.Column="0"
+													Grid.ColumnSpan="3"
+													IsEnabled="{Binding Path=TimerEnabled, RelativeSource={RelativeSource TemplatedParent}}">
+													<Label
+														Content="If timer is already running when triggered again: " />
+													<ComboBox
+														Width="150"
+														ItemsSource="{Binding Path=DisplayNames, Source={StaticResource TimerStartBehaviors}}"
+														SelectedValue="{Binding Path=TimerStartBehavior, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource TimerStartBehaviors}}" />
+												</StackPanel>
+												<StackPanel
+													Grid.Row="8"
+													Grid.Column="2"
+													Orientation="Vertical"
+													Visibility="{Binding ElementName=RestartByName, Path=IsEnabled, ConverterParameter=visible|hidden, Converter={StaticResource ConverterBooleanToVisibility}}">
+													<RadioButton
+														Name="RestartByName"
+														Content="Restart instance if Timer Name matches"
+														GroupName="TimerRunningID"
+														IsChecked="{Binding Path=RestartBasedOnTimerName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+														IsEnabled="{Binding Path=TimerStartBehavior, ConverterParameter='{x:Static biz:TimerStartBehaviors.RestartTimer}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+													<RadioButton
+														Content="Restart instance regardless of Timer Name"
+														GroupName="TimerRunningID"
+														IsChecked="{Binding Path=RestartBasedOnTimerName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanNegate}}" />
+												</StackPanel>
+												<Label
+													Content="End early text (for multiple possible values, add a row for each):"
+													VerticalAlignment="Top"
+													Grid.ColumnSpan="3"
+													Grid.Row="10"
+													Grid.Column="0"
+													IsEnabled="{Binding Path=TimerEnabled, RelativeSource={RelativeSource TemplatedParent}}" />
+												<DataGrid
+													AutoGenerateColumns="False"
+													CanUserAddRows="True"
+													VerticalScrollBarVisibility="Visible"
+													Height="125"
+													Grid.Row="11"
+													Grid.Column="0"
+													Grid.ColumnSpan="3"
+													ItemsSource="{Binding Path=TimerEarlyEnders, RelativeSource={RelativeSource TemplatedParent}}">
+													<DataGrid.Columns>
+														<DataGridTextColumn
+															Header="Search Text"
+															Width="*"
+															Binding="{Binding Path=EarlyEndText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+														<DataGridTemplateColumn
+															Header="Use Regex">
+															<DataGridTemplateColumn.CellTemplate>
+																<DataTemplate>
+																	<Grid>
+																		<CheckBox
+																			IsChecked="{Binding Path=EnableRegex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+																			IsEnabled="{Binding Path=RegexSelectable}" />
+																	</Grid>
+																</DataTemplate>
+															</DataGridTemplateColumn.CellTemplate>
+														</DataGridTemplateColumn>
+													</DataGrid.Columns>
+												</DataGrid>
+											</Grid>
+										</StackPanel>
+									</TabItem>
+									<TabItem
+										IsEnabled="{Binding Path=TimerCountsDown, RelativeSource={RelativeSource TemplatedParent}}">
+										<HeaderedContentControl.Header>
+											<TextBlock
+												Text="Timer Ending"
+												FontWeight="Bold" />
+										</HeaderedContentControl.Header>
+										<StackPanel
+											Orientation="Vertical">
+											<StackPanel
+												Orientation="Horizontal">
+												<CheckBox
+													IsChecked="{Binding Path=UseTimerEnding, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+													<Label
+														Content="Notify when timer is is down to " />
+												</CheckBox>
+												<shared:TimeSpanPicker
+													MaxTimeSpanInSeconds="86400"
+													Granularity="second"
+													Value="{Binding Path=TimerEndingTime, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+													IsEnabled="{Binding Path=UseTimerEnding, RelativeSource={RelativeSource TemplatedParent}}" />
+											</StackPanel>
+											<local:TriggerNotificationEditor
+												x:Name="TimerEndingTriggerEditor"
+												IsEnabled="{Binding Path=UseTimerEnding, RelativeSource={RelativeSource TemplatedParent}}" />
+										</StackPanel>
+									</TabItem>
+									<TabItem
+										IsEnabled="{Binding Path=TimerEnabled, RelativeSource={RelativeSource TemplatedParent}}">
+										<HeaderedContentControl.Header>
+											<TextBlock
+												Text="Timer Ended"
+												FontWeight="Bold" />
+										</HeaderedContentControl.Header>
+										<StackPanel
+											Orientation="Vertical">
+											<StackPanel
+												Orientation="Horizontal">
+												<CheckBox
+													IsChecked="{Binding Path=UseTimerEnded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+													<Label
+														Content="Notify when timer ends" />
+												</CheckBox>
+											</StackPanel>
+											<local:TriggerNotificationEditor
+												x:Name="TimerEndedTriggerEditor"
+												IsEnabled="{Binding Path=UseTimerEnded, RelativeSource={RelativeSource TemplatedParent}}" />
+										</StackPanel>
+									</TabItem>
+									<TabItem>
+										<HeaderedContentControl.Header>
+											<TextBlock
+												Text="Counter"
+												FontWeight="Bold" />
+										</HeaderedContentControl.Header>
+										<StackPanel
+											Orientation="Vertical">
+											<StackPanel
+												Orientation="Horizontal">
+												<CheckBox
+													IsChecked="{Binding Path=UseCounterResetTimer, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+													<Label
+														Content="Reset counter if unmatched for " />
+												</CheckBox>
+												<shared:TimeSpanPicker
+													MaxTimeSpanInSeconds="86400"
+													Granularity="second"
+													Value="{Binding Path=CounterResetDuration, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+											</StackPanel>
+										</StackPanel>
+									</TabItem>
+								</TabControl>
+								<StackPanel
+									HorizontalAlignment="Right"
+									Orientation="Horizontal"
+									Margin="0 0 0 5"
+									Grid.Row="2">
+									<Button
+										Content="Save"
+										Width="80"
+										Margin="0 0 10 0"
+										IsEnabled="{Binding Path=AllowSave, RelativeSource={RelativeSource TemplatedParent}}"
+										Command="{Binding Path=SaveCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Content="Cancel"
+										Width="80"
+										Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+							</Grid>
+						</shared:DialogEditor>
+						<shared:SimpleDialog
+							Title="Error"
+							BorderColor="#FF8B0000"
+							ShowOKButton="True"
+							OKButtonText="OK"
+							Visibility="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}"
+							Message="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}}"
+							OKButtonCommand="{Binding Path=ClearErrorCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:TriggerGroupEditor}"
+		TargetType="{x:Type local:TriggerGroupEditor}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:TriggerGroupEditor}">
+					<shared:DialogEditor
+						MinWidth="500"
+						Title="Trigger Group Editor"
+						ShowDialogAlignButtons="True"
+						Visibility="{TemplateBinding UIElement.Visibility}"
+						VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+						<Grid
+							VerticalAlignment="Top"
+							Margin="4"
+							Width="400">
+							<Grid.RowDefinitions>
+								<RowDefinition />
+								<RowDefinition
+									Height="Auto" />
+							</Grid.RowDefinitions>
+							<GroupBox
+								Grid.Row="0">
+								<HeaderedContentControl.Header>
+									<TextBlock
+										Text="General Settings"
+										FontWeight="Bold" />
+								</HeaderedContentControl.Header>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="Auto" />
+										<ColumnDefinition
+											Width="5" />
+										<ColumnDefinition />
+									</Grid.ColumnDefinitions>
+									<Grid.RowDefinitions>
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<Label
+										Content="Trigger Group Name"
+										Grid.Row="0"
+										Grid.Column="0" />
+									<TextBox
+										Name="tbGroupName"
+										Grid.Row="0"
+										Grid.Column="2"
+										Text="{Binding Path=GroupName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Comments"
+										VerticalAlignment="Bottom"
+										Margin="0 0 0 18"
+										Grid.Row="2"
+										Grid.Column="0" />
+									<TextBox
+										TextWrapping="Wrap"
+										Height="36"
+										Grid.Row="2"
+										Grid.Column="2"
+										Text="{Binding Path=Comments, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<CheckBox
+										Grid.Row="4"
+										Grid.Column="0"
+										Grid.ColumnSpan="3"
+										IsChecked="{Binding Path=EnableByDefault, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+										<Label
+											Content="Enable For Characters By Default"
+											ToolTip="Enable this group for all characters by default.  Trigger groups added to this group in the future will inherit this setting." />
+									</CheckBox>
+								</Grid>
+							</GroupBox>
+							<StackPanel
+								HorizontalAlignment="Right"
+								Orientation="Horizontal"
+								Grid.Row="1">
+								<Button
+									Content="Save"
+									Width="80"
+									Margin="0 0 10 0"
+									IsEnabled="{Binding Path=AllowSave, RelativeSource={RelativeSource TemplatedParent}}"
+									Command="{Binding Path=SaveCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Button
+									Content="Cancel"
+									Width="80"
+									Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+							</StackPanel>
+							<shared:SimpleDialog
+								Title="Error"
+								BorderColor="#FF8B0000"
+								ShowOKButton="True"
+								OKButtonText="OK"
+								Grid.Row="0"
+								Grid.RowSpan="2"
+								Visibility="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}"
+								Message="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}}"
+								OKButtonCommand="{Binding Path=ClearErrorCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+						</Grid>
+					</shared:DialogEditor>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:CharacterEditor}"
+		TargetType="{x:Type local:CharacterEditor}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:CharacterEditor}">
+					<shared:DialogEditor
+						MinWidth="500"
+						Title="Character Editor"
+						ShowDialogAlignButtons="True"
+						Visibility="{TemplateBinding UIElement.Visibility}"
+						VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+						<StackPanel
+							Margin="0"
+							HorizontalAlignment="Left"
+							Width="500">
+							<GroupBox
+								Margin="0 3 0 5">
+								<HeaderedContentControl.Header>
+									<TextBlock
+										Text="General Settings"
+										FontWeight="Bold" />
+								</HeaderedContentControl.Header>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="Auto" />
+										<ColumnDefinition
+											Width="5" />
+										<ColumnDefinition />
+										<ColumnDefinition
+											Width="5" />
+										<ColumnDefinition
+											Width="30" />
+									</Grid.ColumnDefinitions>
+									<Grid.RowDefinitions>
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<Label
+										Content="Log File"
+										Grid.Row="0"
+										Grid.Column="0" />
+									<TextBox
+										Grid.Row="0"
+										Grid.Column="2"
+										Text="{Binding Path=LogFilePath, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Content="..."
+										Width="30"
+										Height="20"
+										Grid.Row="0"
+										Grid.Column="4"
+										Command="{Binding Path=FindFileCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Profile Name"
+										Grid.Row="2"
+										Grid.Column="0" />
+									<TextBox
+										Grid.Row="2"
+										Grid.Column="2"
+										Grid.ColumnSpan="3"
+										Text="{Binding Path=DisplayName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Character Name"
+										Grid.Row="4"
+										Grid.Column="0" />
+									<TextBox
+										Width="200"
+										HorizontalAlignment="Left"
+										Grid.Row="4"
+										Grid.Column="2"
+										Grid.ColumnSpan="3"
+										Text="{Binding Path=CharacterName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<CheckBox
+										Grid.Row="6"
+										Grid.Column="0"
+										Grid.ColumnSpan="5"
+										IsChecked="{Binding Path=AutoMonitor, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+										<Label
+											Content="Monitor on Startup" />
+									</CheckBox>
+								</Grid>
+							</GroupBox>
+							<GroupBox
+								Margin="0 0 0 5">
+								<HeaderedContentControl.Header>
+									<TextBlock
+										Text="Colors"
+										FontWeight="Bold" />
+								</HeaderedContentControl.Header>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="Auto" />
+										<ColumnDefinition
+											Width="5" />
+										<ColumnDefinition
+											Width="90" />
+										<ColumnDefinition />
+									</Grid.ColumnDefinitions>
+									<Grid.RowDefinitions>
+										<RowDefinition />
+										<RowDefinition />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<Label
+										Content="Text Font Color"
+										Grid.Row="0"
+										Grid.Column="0" />
+									<extToolkit:ColorPicker
+										ShowAvailableColors="False"
+										ShowRecentColors="True"
+										HorizontalAlignment="Left"
+										Grid.Row="0"
+										Grid.Column="2"
+										Width="60"
+										SelectedColor="{Binding Path=TextFontColor, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Timer Font Color"
+										Grid.Row="1"
+										Grid.Column="0" />
+									<extToolkit:ColorPicker
+										ShowAvailableColors="False"
+										ShowRecentColors="True"
+										HorizontalAlignment="Left"
+										Grid.Row="1"
+										Grid.Column="2"
+										Width="60"
+										SelectedColor="{Binding Path=TimerFontColor, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Timer Bar Color"
+										Grid.Row="2"
+										Grid.Column="0" />
+									<extToolkit:ColorPicker
+										ShowAvailableColors="False"
+										ShowRecentColors="True"
+										HorizontalAlignment="Left"
+										Grid.Row="2"
+										Grid.Column="2"
+										Width="60"
+										SelectedColor="{Binding Path=TimerBarColor, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<TextBlock
+										Text="Note: These colors will only be used for categories which are set to 'Use character colors'."
+										Grid.Row="0"
+										Grid.Column="3"
+										Grid.RowSpan="3"
+										TextWrapping="Wrap"
+										VerticalAlignment="Top" />
+								</Grid>
+							</GroupBox>
+							<GroupBox
+								Margin="0 0 0 10">
+								<HeaderedContentControl.Header>
+									<TextBlock
+										Text="Audio Settings"
+										FontWeight="Bold" />
+								</HeaderedContentControl.Header>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="Auto" />
+										<ColumnDefinition
+											Width="5" />
+										<ColumnDefinition />
+									</Grid.ColumnDefinitions>
+									<Grid.RowDefinitions>
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<Label
+										Content="Volume"
+										Grid.Row="0"
+										Grid.Column="0" />
+									<Slider
+										Minimum="0"
+										Maximum="100"
+										Width="200"
+										Grid.Row="0"
+										Grid.Column="2"
+										Value="{Binding Path=Volume, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Voice"
+										Grid.Row="2"
+										Grid.Column="0" />
+									<ComboBox
+										Width="200"
+										Grid.Row="2"
+										Grid.Column="2"
+										ItemsSource="{Binding Path=AvailableVoices, RelativeSource={RelativeSource TemplatedParent}}"
+										SelectedValue="{Binding Path=VoiceName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Voice Speed"
+										Grid.Row="4"
+										Grid.Column="0" />
+									<Slider
+										Minimum="-10"
+										Maximum="10"
+										Width="200"
+										Grid.Row="4"
+										Grid.Column="2"
+										Value="{Binding Path=VoiceSpeed, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Phonetic Name"
+										Grid.Row="6"
+										Grid.Column="0" />
+									<StackPanel
+										Orientation="Horizontal"
+										Grid.Row="6"
+										Grid.Column="2">
+										<TextBox
+											Width="200"
+											Text="{Binding Path=PhoneticName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Margin="3 0 0 0"
+											Command="{Binding Path=PlayPhoneticNameCommand, RelativeSource={RelativeSource TemplatedParent}}">
+											<Control.Template>
+												<ControlTemplate>
+													<Image
+														Source="pack://application:,,,/Resources/Play16.png"
+														Height="15" />
+												</ControlTemplate>
+											</Control.Template>
+										</Button>
+									</StackPanel>
+									<Label
+										Content="Sample"
+										Grid.Row="8"
+										Grid.Column="0" />
+									<Grid
+										Row="8"
+										Column="2">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition
+												Width="Auto" />
+										</Grid.ColumnDefinitions>
+										<TextBox
+											Grid.Column="0"
+											Text="{Binding Path=SampleText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Grid.Column="2"
+											Command="{Binding Path=PlaySampleCommand, RelativeSource={RelativeSource TemplatedParent}}">
+											<Control.Template>
+												<ControlTemplate>
+													<Image
+														Source="pack://application:,,,/Resources/Play16.png"
+														Height="15" />
+												</ControlTemplate>
+											</Control.Template>
+										</Button>
+									</Grid>
+								</Grid>
+							</GroupBox>
+							<StackPanel
+								HorizontalAlignment="Right"
+								Orientation="Horizontal"
+								Margin="0 0 0 5">
+								<Button
+									Content="Save"
+									Width="80"
+									Margin="0 0 10 0"
+									IsEnabled="{Binding Path=AllowSave, RelativeSource={RelativeSource TemplatedParent}}"
+									Command="{Binding Path=SaveCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Button
+									Content="Cancel"
+									Width="80"
+									Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+							</StackPanel>
+						</StackPanel>
+					</shared:DialogEditor>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:PreferencesEditor}"
+		TargetType="{x:Type local:PreferencesEditor}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:PreferencesEditor}">
+					<shared:DialogEditor
+						Title="Settings"
+						ShowDialogAlignButtons="True"
+						MinWidth="500"
+						Visibility="{TemplateBinding UIElement.Visibility}"
+						VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+						<StackPanel
+							Width="Auto"
+							Height="Auto"
+							Margin="0"
+							HorizontalAlignment="Left">
+							<TabControl
+								Width="600"
+								Height="330">
+								<TabItem>
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="General"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="Auto" />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition
+												Width="50" />
+											<ColumnDefinition
+												Width="Auto" />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition
+												Width="1*" />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition
+												Width="Auto" />
+										</Grid.ColumnDefinitions>
+										<Grid.RowDefinitions>
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+										</Grid.RowDefinitions>
+										<CheckBox
+											Grid.Row="0"
+											Grid.Column="0"
+											Grid.ColumnSpan="5"
+											IsChecked="{Binding Path=AutoUpdate, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Check for Application Updates during Launch" />
+										</CheckBox>
+										<CheckBox
+											Grid.Row="2"
+											Grid.Column="0"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=EnableSound, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Enable Sound" />
+										</CheckBox>
+										<Label
+											Content="Master Volume"
+											Grid.Row="2"
+											Grid.Column="3" />
+										<Slider
+											Grid.Row="2"
+											Grid.Column="5"
+											Minimum="0"
+											Maximum="100"
+											HorizontalAlignment="Stretch"
+											Value="{Binding Path=MasterVolume, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<CheckBox
+											Grid.Row="4"
+											Grid.Column="0"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=EnableText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Enable Text" />
+										</CheckBox>
+										<CheckBox
+											Grid.Row="4"
+											Grid.Column="3"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=EnableTimers, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Enable Timers" />
+										</CheckBox>
+										<CheckBox
+											Grid.Row="6"
+											Grid.Column="0"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=MinimizeToSystemTray, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Minimize To System Tray" />
+										</CheckBox>
+										<CheckBox
+											Grid.Row="6"
+											Grid.Column="3"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=StopSearchingAfterFirstMatch, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Stop Trigger Search After First Match" />
+										</CheckBox>
+										<CheckBox
+											Grid.Row="8"
+											Grid.Column="0"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=DisplayMatches, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Display Match Log" />
+										</CheckBox>
+										<Label
+											Content="Maximum Log Entries"
+											Grid.Row="8"
+											Grid.Column="3"
+											IsEnabled="{Binding Path=DisplayMatches, RelativeSource={RelativeSource TemplatedParent}}" />
+										<extToolkit:IntegerUpDown
+											Minimum="10"
+											Maximum="1000"
+											Width="50"
+											HorizontalAlignment="Left"
+											Grid.Row="8"
+											Grid.Column="5"
+											Value="{Binding Path=MatchDisplayLimit, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+											IsEnabled="{Binding Path=DisplayMatches, RelativeSource={RelativeSource TemplatedParent}}" />
+										<CheckBox
+											Grid.Row="10"
+											Grid.Column="0"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=LogMatchesToFile, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Log Matches to File" />
+										</CheckBox>
+										<TextBox
+											Grid.Row="10"
+											Grid.Column="2"
+											Grid.ColumnSpan="4"
+											Text="{Binding Path=MatchLogFileName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+											IsEnabled="{Binding Path=LogMatchesToFile, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Content="..."
+											Width="30"
+											Height="20"
+											Grid.Row="10"
+											Grid.Column="7"
+											Command="{Binding Path=FindMatchLogCommand, RelativeSource={RelativeSource TemplatedParent}}"
+											IsEnabled="{Binding Path=LogMatchesToFile, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Clipboard Replacement For {C}"
+											Grid.Row="12"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="12"
+											Grid.Column="2"
+											Grid.ColumnSpan="4"
+											Text="{Binding Path=CTagClipboardReplacement, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Everquest Folder"
+											Grid.Row="14"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="14"
+											Grid.Column="2"
+											Grid.ColumnSpan="4"
+											Text="{Binding Path=EverquestFolder, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Content="..."
+											Width="30"
+											Height="20"
+											Grid.Row="14"
+											Grid.Column="7"
+											Command="{Binding Path=FindEverquestFolderCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Imported Media Folder"
+											Grid.Row="16"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="16"
+											Grid.Column="2"
+											Grid.ColumnSpan="4"
+											Text="{Binding Path=ImportedMediaFileFolder, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Content="..."
+											Width="30"
+											Height="20"
+											Grid.Row="16"
+											Grid.Column="7"
+											Command="{Binding Path=FindMediaFolderCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="GINA Data Folder"
+											Grid.Row="18"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="18"
+											Grid.Column="2"
+											Grid.ColumnSpan="4"
+											Text="{Binding Path=DataFolder, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Content="..."
+											Width="30"
+											Height="20"
+											Grid.Row="18"
+											Grid.Column="7"
+											Command="{Binding Path=FindDataFolderCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									</Grid>
+								</TabItem>
+								<TabItem>
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="Sharing"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="*" />
+											<RowDefinition
+												Height="*" />
+										</Grid.RowDefinitions>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="Auto" />
+											<ColumnDefinition />
+										</Grid.ColumnDefinitions>
+										<StackPanel
+											Orientation="Horizontal"
+											Margin="10 2 0 0"
+											Grid.Row="0"
+											Grid.Column="0">
+											<CheckBox
+												IsChecked="{Binding Path=AllowSharedPackages, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+												<Label
+													Content="Enable GimaLink"
+													MaxWidth="140"
+													Width="140" />
+											</CheckBox>
+										</StackPanel>
+										<StackPanel
+											Orientation="Horizontal"
+											Margin="10 2 0 0"
+											Grid.Row="0"
+											Grid.Column="1">
+											<CheckBox
+												IsChecked="{Binding Path=AllowGamTextTriggerShares, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+												<Label
+													Content="Enable Incoming GamTextTriggers Sharing"
+													MaxWidth="220"
+													Width="220" />
+											</CheckBox>
+										</StackPanel>
+										<GroupBox
+											Grid.Row="1"
+											Margin="5 5 0 0"
+											Padding="5"
+											IsEnabled="{Binding Path=AllowSharedPackages, RelativeSource={RelativeSource TemplatedParent}}">
+											<HeaderedContentControl.Header>
+												<TextBlock
+													Text="Accept Share Invitations From" />
+											</HeaderedContentControl.Header>
+											<StackPanel>
+												<RadioButton
+													GroupName="AcceptLevel"
+													Content="Nobody"
+													IsChecked="{Binding Path=AcceptShareLevel, Mode=TwoWay, ConverterParameter='{x:Static biz:ShareLevel.Nobody}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+												<RadioButton
+													GroupName="AcceptLevel"
+													Content="Trusted List"
+													IsChecked="{Binding Path=AcceptShareLevel, Mode=TwoWay, ConverterParameter='{x:Static biz:ShareLevel.TrustedList}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+												<RadioButton
+													GroupName="AcceptLevel"
+													Content="Anybody"
+													IsChecked="{Binding Path=AcceptShareLevel, Mode=TwoWay, ConverterParameter='{x:Static biz:ShareLevel.Anybody}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+											</StackPanel>
+										</GroupBox>
+										<GroupBox
+											Grid.Row="2"
+											Margin="5 5 0 0"
+											Padding="5"
+											IsEnabled="{Binding Path=AllowSharedPackages, RelativeSource={RelativeSource TemplatedParent}}">
+											<HeaderedContentControl.Header>
+												<TextBlock
+													Text="Automatically Merge Invitations From" />
+											</HeaderedContentControl.Header>
+											<StackPanel>
+												<RadioButton
+													GroupName="AutoMergeLevel"
+													Content="Nobody"
+													IsChecked="{Binding Path=AutoMergeShareLevel, Mode=TwoWay, ConverterParameter='{x:Static biz:ShareLevel.Nobody}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+												<RadioButton
+													GroupName="AutoMergeLevel"
+													Content="Trusted List"
+													IsChecked="{Binding Path=AutoMergeShareLevel, Mode=TwoWay, ConverterParameter='{x:Static biz:ShareLevel.TrustedList}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+												<RadioButton
+													GroupName="AutoMergeLevel"
+													Content="Anybody"
+													IsChecked="{Binding Path=AutoMergeShareLevel, Mode=TwoWay, ConverterParameter='{x:Static biz:ShareLevel.Anybody}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+											</StackPanel>
+										</GroupBox>
+										<GroupBox
+											Grid.Row="1"
+											Grid.Column="1"
+											Grid.RowSpan="2"
+											Margin="5 5 5 0"
+											Padding="5"
+											IsEnabled="{Binding Path=AllowSharedPackages, RelativeSource={RelativeSource TemplatedParent}}">
+											<HeaderedContentControl.Header>
+												<TextBlock
+													Text="Trusted Sender List" />
+											</HeaderedContentControl.Header>
+											<Grid
+												VerticalAlignment="Stretch">
+												<Grid.RowDefinitions>
+													<RowDefinition
+														Height="Auto" />
+													<RowDefinition />
+													<RowDefinition
+														Height="Auto" />
+												</Grid.RowDefinitions>
+												<StackPanel
+													Orientation="Horizontal">
+													<Label
+														Content="Name"
+														MaxWidth="40"
+														Width="40" />
+													<TextBox
+														Width="80"
+														MaxWidth="80"
+														Text="{Binding Path=NewTrustedName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+													<Button
+														Content="Add"
+														VerticalAlignment="Bottom"
+														Style="{StaticResource LinkButtonStyle}"
+														Command="{Binding Path=AddTrustedNameCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+												</StackPanel>
+												<ListView
+													VerticalAlignment="Stretch"
+													VerticalContentAlignment="Top"
+													ScrollViewer.CanContentScroll="True"
+													Grid.Row="1"
+													ItemsSource="{Binding Path=ShareWhiteList, RelativeSource={RelativeSource TemplatedParent}}"
+													SelectedItem="{Binding Path=SelectedTrustedName, Mode=OneWayToSource, RelativeSource={RelativeSource TemplatedParent}}" />
+												<Button
+													Content="Remove"
+													VerticalAlignment="Bottom"
+													Grid.Row="2"
+													Style="{StaticResource LinkButtonStyle}"
+													Command="{Binding Path=RemoveTrustedNameCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+											</Grid>
+										</GroupBox>
+									</Grid>
+								</TabItem>
+								<TabItem>
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="Log Maintenance"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+										</Grid.RowDefinitions>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="Auto" />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition
+												Width="Auto" />
+										</Grid.ColumnDefinitions>
+										<CheckBox
+											Grid.Row="2"
+											Grid.Column="0"
+											Grid.ColumnSpan="5"
+											IsChecked="{Binding Path=ArchiveLogs, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Auto-archive log files" />
+										</CheckBox>
+										<CheckBox
+											Grid.Row="4"
+											Grid.Column="0"
+											Grid.ColumnSpan="5"
+											IsChecked="{Binding Path=CompressArchivedLogs, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+											IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Compress archived log files" />
+										</CheckBox>
+										<Label
+											Content="Log Archive Folder"
+											Grid.Row="0"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="0"
+											Grid.Column="2"
+											Text="{Binding Path=LogArchiveFolder, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Content="..."
+											Width="30"
+											Height="20"
+											Grid.Row="0"
+											Grid.Column="4"
+											Command="{Binding Path=FindArchiveFolderCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Archive Method"
+											Grid.Row="6"
+											Grid.Column="0"
+											IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}" />
+										<ComboBox
+											Grid.Row="6"
+											Grid.Column="2"
+											Width="150"
+											ItemsSource="{Binding Path=DisplayNames, Source={StaticResource ArchiveMethods}}"
+											SelectedValue="{Binding Path=LogArchiveMethod, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ArchiveMethods}}"
+											IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Archive Schedule"
+											Grid.Row="8"
+											Grid.Column="0"
+											IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}"
+											Visibility="{Binding Path=LogArchiveMethod, ConverterParameter='{x:Static biz:ArchiveMethods.ByDate}', RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource ConverterEnumToVisibility}}" />
+										<ComboBox
+											Grid.Row="8"
+											Grid.Column="2"
+											Width="150"
+											ItemsSource="{Binding Path=DisplayNames, Source={StaticResource ArchiveSchedules}}"
+											SelectedValue="{Binding Path=LogArchiveSchedule, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ArchiveSchedules}}"
+											IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}"
+											Visibility="{Binding Path=LogArchiveMethod, ConverterParameter='{x:Static biz:ArchiveMethods.ByDate}', RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource ConverterEnumToVisibility}}" />
+										<Label
+											Content="Log File Size"
+											Grid.Row="8"
+											Grid.Column="0"
+											IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}"
+											Visibility="{Binding Path=LogArchiveMethod, ConverterParameter='{x:Static biz:ArchiveMethods.BySize}', RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource ConverterEnumToVisibility}}" />
+										<StackPanel
+											Orientation="Horizontal"
+											Grid.Row="8"
+											Grid.Column="2"
+											Visibility="{Binding Path=LogArchiveMethod, ConverterParameter='{x:Static biz:ArchiveMethods.BySize}', RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource ConverterEnumToVisibility}}">
+											<extToolkit:IntegerUpDown
+												Minimum="10"
+												Maximum="1000000"
+												Width="80"
+												HorizontalAlignment="Left"
+												Value="{Binding Path=LogArchiveThresholdSize, Mode=TwoWay, ConverterParameter='b,mb', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterByteWholeSize}}"
+												IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}" />
+											<Label
+												Content=" MB"
+												IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}" />
+										</StackPanel>
+										<CheckBox
+											Height="30"
+											Grid.Row="10"
+											Grid.Column="0"
+											Grid.ColumnSpan="5"
+											IsChecked="{Binding Path=PurgeArchivedLogs, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+											IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}">
+											<StackPanel
+												Orientation="Horizontal">
+												<Label
+													Content="Delete archived log files over " />
+												<extToolkit:IntegerUpDown
+													Minimum="0"
+													Maximum="9999"
+													Width="80"
+													HorizontalAlignment="Left"
+													Value="{Binding Path=ArchivePurgeDaysToKeep, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+													IsEnabled="{Binding Path=ArchiveLogs, RelativeSource={RelativeSource TemplatedParent}}" />
+												<Label
+													Content=" days old" />
+											</StackPanel>
+										</CheckBox>
+									</Grid>
+								</TabItem>
+								<TabItem>
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="Advanced"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="Auto" />
+											<ColumnDefinition
+												Width="5" />
+											<ColumnDefinition />
+										</Grid.ColumnDefinitions>
+										<Grid.RowDefinitions>
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition />
+										</Grid.RowDefinitions>
+										<Label
+											Content="Share Service URI"
+											Grid.Row="0"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="0"
+											Grid.Column="2"
+											Text="{Binding Path=ShareServiceUri, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Reference to Self"
+											Grid.Row="2"
+											Grid.Column="0" />
+										<TextBox
+											Width="60"
+											HorizontalAlignment="Left"
+											Grid.Row="2"
+											Grid.Column="2"
+											Text="{Binding Path=ReferenceToSelf, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<CheckBox
+											Grid.Row="4"
+											Grid.Column="0"
+											Grid.ColumnSpan="3"
+											IsChecked="{Binding Path=EnableDebugLog, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+											<Label
+												Content="Enable Debug Logging" />
+										</CheckBox>
+									</Grid>
+								</TabItem>
+							</TabControl>
+							<StackPanel
+								HorizontalAlignment="Right"
+								Orientation="Horizontal"
+								Margin="5 0 5 5">
+								<Button
+									Content="Save"
+									Width="80"
+									Margin="0 0 10 0"
+									Command="{Binding Path=SaveCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Button
+									Content="Cancel"
+									Width="80"
+									Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+							</StackPanel>
+						</StackPanel>
+					</shared:DialogEditor>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:UploadControl}"
+		TargetType="{x:Type local:UploadControl}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:UploadControl}">
+					<Grid
+						HorizontalAlignment="Stretch"
+						VerticalAlignment="Stretch"
+						Visibility="{Binding Path=Visibility, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+						<shared:DialogOverlay
+							Title="Share"
+							ContentWidth="375"
+							ContentHeight="120"
+							Visibility="{Binding Path=Status, ConverterParameter=0|1, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<TextBlock
+								Text="Connecting to Sharing Service..."
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center" />
+						</shared:DialogOverlay>
+						<shared:DialogOverlay
+							Title="Share"
+							ContentWidth="375"
+							ContentHeight="120"
+							Visibility="{Binding Path=Status, ConverterParameter=2|2, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<StackPanel
+								Margin="5 10 5 5"
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center">
+								<TextBlock
+									Text="Transferring" />
+								<Grid
+									Width="300"
+									Height="18">
+									<ProgressBar
+										Minimum="0"
+										Maximum="{Binding Path=TotalBytes, RelativeSource={RelativeSource TemplatedParent}}"
+										Value="{Binding Path=UploadedBytes, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Viewbox>
+										<StackPanel
+											Orientation="Horizontal">
+											<TextBlock
+												Text="{Binding Path=UploadedBytes, RelativeSource={RelativeSource TemplatedParent}}" />
+											<TextBlock
+												Text=" / " />
+											<TextBlock
+												Text="{Binding Path=TotalBytes, RelativeSource={RelativeSource TemplatedParent}}" />
+										</StackPanel>
+									</Viewbox>
+								</Grid>
+							</StackPanel>
+						</shared:DialogOverlay>
+						<shared:DialogOverlay
+							Title="Share"
+							ContentWidth="400"
+							ContentHeight="180"
+							Visibility="{Binding Path=Status, ConverterParameter=3|3, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<Grid
+								Margin="5 10 5 5">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition />
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition
+										Width="100" />
+									<ColumnDefinition />
+								</Grid.ColumnDefinitions>
+								<TextBlock
+									Text="Upload Successful!"
+									FontWeight="Bold"
+									Grid.Row="0"
+									Grid.Column="0"
+									Grid.ColumnSpan="2" />
+								<TextBlock
+									Text="Package Token:"
+									Grid.Row="2"
+									Grid.Column="0"
+									VerticalAlignment="Bottom"
+									Margin="0 10 0 0" />
+								<TextBox
+									IsReadOnly="True"
+									VerticalAlignment="Bottom"
+									Grid.Row="2"
+									Grid.Column="1"
+									Text="{Binding Path=ShareToken, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}" />
+								<StackPanel
+									Orientation="Horizontal"
+									Grid.Row="4"
+									Grid.Column="1"
+									HorizontalAlignment="Right"
+									Margin="0 10 0 0">
+									<Button
+										Content="Copy To Clipboard"
+										HorizontalAlignment="Right"
+										FontSize="13"
+										Margin="0 0 5 0"
+										Command="{Binding Path=CopyToClipboardCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Content="Close"
+										HorizontalAlignment="Right"
+										FontSize="13"
+										Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+								<TextBlock
+									Text="Send this token to other GINA users through a tell, guild chat, fellowship chat, etc. to share this package with them.  The token will be valid for approximately one hour."
+									TextWrapping="Wrap"
+									Margin="0 10"
+									Grid.Row="6"
+									Grid.Column="0"
+									Grid.ColumnSpan="2" />
+							</Grid>
+						</shared:DialogOverlay>
+						<shared:DialogEditor
+							Title="Submit to Library"
+							Visibility="{Binding Path=Status, ConverterParameter=5|5, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<Grid
+								Margin="5 10 5 5">
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+										<RowDefinition
+											Height="5" />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="140" />
+										<ColumnDefinition
+											Width="5" />
+										<ColumnDefinition />
+									</Grid.ColumnDefinitions>
+									<Label
+										Content="Trigger Group:"
+										Grid.Row="0"
+										Grid.Column="0"
+										Visibility="{Binding Path=TriggerGroup, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}" />
+									<Label
+										Grid.Row="0"
+										Grid.Column="2"
+										Content="{Binding Path=TriggerGroup.Name, RelativeSource={RelativeSource TemplatedParent}}"
+										Visibility="{Binding Path=TriggerGroup, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}" />
+									<Label
+										Content="Trigger:"
+										Grid.Row="0"
+										Grid.Column="0"
+										Visibility="{Binding Path=Trigger, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}" />
+									<Label
+										Grid.Row="0"
+										Grid.Column="2"
+										Content="{Binding Path=Trigger.Name, RelativeSource={RelativeSource TemplatedParent}}"
+										Visibility="{Binding Path=Trigger, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}" />
+									<Label
+										Content="Category:"
+										Grid.Row="2"
+										Grid.Column="0" />
+									<ComboBox
+										Width="150"
+										Grid.Row="2"
+										Grid.Column="2"
+										ItemsSource="{Binding Path=Categories, RelativeSource={RelativeSource TemplatedParent}}"
+										SelectedValue="{Binding Path=SelectedCategory, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Sub-Category:"
+										Grid.Row="4"
+										Grid.Column="0" />
+									<ComboBox
+										DisplayMemberPath="SubCategoryName"
+										Width="150"
+										Grid.Row="4"
+										Grid.Column="2"
+										ItemsSource="{Binding Path=SubCategories, RelativeSource={RelativeSource TemplatedParent}}"
+										SelectedValue="{Binding Path=SelectedSubCategory, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Name:"
+										Grid.Row="6"
+										Grid.Column="0" />
+									<TextBox
+										Grid.Row="6"
+										Grid.Column="2"
+										Text="{Binding Path=SubmissionName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Comments:"
+										Grid.Row="8"
+										Grid.Column="0" />
+									<TextBox
+										Grid.Row="8"
+										Grid.Column="2"
+										Text="{Binding Path=Comment, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<StackPanel
+										Orientation="Horizontal"
+										HorizontalAlignment="Right"
+										Grid.Row="10"
+										Grid.Column="2">
+										<Button
+											Content="Upload"
+											Width="80"
+											IsEnabled="{Binding Path=CanUpload, RelativeSource={RelativeSource TemplatedParent}}"
+											Command="{Binding Path=UploadSubmissionCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											Content="Cancel"
+											Width="80"
+											Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									</StackPanel>
+								</Grid>
+							</Grid>
+						</shared:DialogEditor>
+						<shared:SimpleDialog
+							Title="Error"
+							BorderColor="#FF8B0000"
+							ShowOKButton="True"
+							OKButtonText="OK"
+							Visibility="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}"
+							Message="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}}"
+							OKButtonCommand="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:DownloadControl}"
+		TargetType="{x:Type local:DownloadControl}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:DownloadControl}">
+					<Grid
+						HorizontalAlignment="Stretch"
+						VerticalAlignment="Stretch"
+						Visibility="{Binding Path=PackageInProgress, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}">
+						<shared:SimpleDialog
+							Padding="10"
+							ShowOKButton="True"
+							OKButtonText="Accept"
+							ShowCancelButton="True"
+							CancelButtonText="Decline"
+							Visibility="{Binding Path=Status, ConverterParameter=1|1, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}"
+							Message="{Binding Path=SharingPrompt, RelativeSource={RelativeSource TemplatedParent}}"
+							OKButtonCommand="{Binding Path=AcceptCommand, RelativeSource={RelativeSource TemplatedParent}}"
+							CancelButtonCommand="{Binding Path=DeclineCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+						<shared:DialogOverlay
+							Title="GimaLink"
+							ContentWidth="375"
+							ContentHeight="120"
+							Visibility="{Binding Path=Status, ConverterParameter=2|2, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<StackPanel
+								Margin="5"
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center">
+								<TextBlock
+									Text="Connecting to Sharing Service..." />
+							</StackPanel>
+						</shared:DialogOverlay>
+						<shared:DialogOverlay
+							Title="GimaLink"
+							ContentWidth="375"
+							ContentHeight="120"
+							Visibility="{Binding Path=Status, ConverterParameter=7|7, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<StackPanel
+								Margin="5"
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center">
+								<TextBlock
+									Text="Downloading Repository Catalog..." />
+							</StackPanel>
+						</shared:DialogOverlay>
+						<shared:DialogOverlay
+							Title="GimaLink"
+							ContentWidth="375"
+							ContentHeight="120"
+							Visibility="{Binding Path=Status, ConverterParameter=3|3, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<StackPanel
+								Margin="5"
+								HorizontalAlignment="Left"
+								VerticalAlignment="Center">
+								<TextBlock
+									Text="Transferring" />
+								<Grid
+									Width="300"
+									Height="18">
+									<ProgressBar
+										Minimum="0"
+										Maximum="{Binding Path=TotalBytes, RelativeSource={RelativeSource TemplatedParent}}"
+										Value="{Binding Path=DownloadedBytes, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Viewbox>
+										<StackPanel
+											Orientation="Horizontal">
+											<TextBlock
+												Text="{Binding Path=DownloadedBytes, RelativeSource={RelativeSource TemplatedParent}}" />
+											<TextBlock
+												Text=" / " />
+											<TextBlock
+												Text="{Binding Path=TotalBytes, RelativeSource={RelativeSource TemplatedParent}}" />
+										</StackPanel>
+									</Viewbox>
+								</Grid>
+							</StackPanel>
+						</shared:DialogOverlay>
+						<shared:DialogEditor
+							Title="Gimagukk's Library"
+							DialogVerticalAlignment="Stretch"
+							DialogHorizontalAlignment="Stretch"
+							DialogMargin="30"
+							Visibility="{Binding Path=Status, ConverterParameter=8|8, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<Grid
+								HorizontalAlignment="Stretch"
+								VerticalAlignment="Stretch"
+								Visibility="{Binding Path=Status, ConverterParameter=8|8, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="*" />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<GroupBox
+									Grid.Row="0">
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="Search"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="Auto" />
+										</Grid.RowDefinitions>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="80" />
+											<ColumnDefinition
+												Width="1*" />
+											<ColumnDefinition
+												Width="80" />
+											<ColumnDefinition
+												Width="1*" />
+										</Grid.ColumnDefinitions>
+										<Label
+											Content="Category"
+											VerticalAlignment="Bottom"
+											Grid.Row="0"
+											Grid.Column="0" />
+										<ComboBox
+											HorizontalAlignment="Stretch"
+											Margin="0 0 15 0"
+											Grid.Row="0"
+											Grid.Column="1"
+											ItemsSource="{Binding Path=Categories, RelativeSource={RelativeSource TemplatedParent}}"
+											SelectedValue="{Binding Path=SelectedCategory, Mode=OneWayToSource, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Sub-Category"
+											VerticalAlignment="Bottom"
+											Grid.Row="0"
+											Grid.Column="2" />
+										<ComboBox
+											HorizontalAlignment="Stretch"
+											Grid.Row="0"
+											Grid.Column="3"
+											ItemsSource="{Binding Path=SubCategories, RelativeSource={RelativeSource TemplatedParent}}"
+											SelectedValue="{Binding Path=SelectedSubCategory, Mode=OneWayToSource, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Search Text"
+											VerticalAlignment="Bottom"
+											Grid.Row="1"
+											Grid.Column="0" />
+										<TextBox
+											Grid.Row="1"
+											Grid.Column="1"
+											Grid.ColumnSpan="3"
+											Text="{Binding Path=SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
+									</Grid>
+								</GroupBox>
+								<ListView
+									Background="#00FFFFFF"
+									BorderThickness="0"
+									ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+									ScrollViewer.CanContentScroll="False"
+									Margin="0 5 0 0"
+									Grid.Row="1"
+									ItemsSource="{Binding Path=RepositoryEntriesView, RelativeSource={RelativeSource TemplatedParent}}">
+									<FrameworkElement.Resources>
+										<ResourceDictionary>
+											<Style
+												x:Key="RepositoryEntryStyle"
+												TargetType="{x:Type Border}">
+												<Style.Triggers>
+													<DataTrigger
+														Value="False"
+														Binding="{Binding Path=IsSelected}">
+														<Setter
+															Property="BorderBrush"
+															Value="#880000AA" />
+														<Setter
+															Property="Background"
+															Value="#220000EE" />
+													</DataTrigger>
+													<DataTrigger
+														Value="True"
+														Binding="{Binding Path=IsSelected}">
+														<Setter
+															Property="BorderBrush"
+															Value="#FF800000" />
+														<Setter
+															Property="Background"
+															Value="#22EE0000" />
+													</DataTrigger>
+												</Style.Triggers>
+											</Style>
+										</ResourceDictionary>
+									</FrameworkElement.Resources>
+									<ItemsControl.ItemsPanel>
+										<ItemsPanelTemplate>
+											<WrapPanel
+												Orientation="Horizontal" />
+										</ItemsPanelTemplate>
+									</ItemsControl.ItemsPanel>
+									<ItemsControl.ItemContainerStyle>
+										<Style
+											TargetType="{x:Type ListViewItem}">
+											<Setter
+												Property="Background"
+												Value="#00FFFFFF" />
+											<Setter
+												Property="Template">
+												<Setter.Value>
+													<ControlTemplate
+														TargetType="{x:Type ListViewItem}">
+														<Border
+															SnapsToDevicePixels="True"
+															Width="350"
+															BorderThickness="2"
+															CornerRadius="8"
+															Margin="2 1"
+															Padding="0 0 0 5"
+															Style="{StaticResource RepositoryEntryStyle}">
+															<ContentPresenter
+																HorizontalAlignment="Stretch"
+																VerticalAlignment="Top"
+																SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+														</Border>
+													</ControlTemplate>
+												</Setter.Value>
+											</Setter>
+										</Style>
+									</ItemsControl.ItemContainerStyle>
+									<ItemsControl.ItemTemplate>
+										<DataTemplate
+											x:Key="{DataTemplateKey {x:Type local:RepositoryEntryFacade}}"
+											DataType="{x:Type local:RepositoryEntryFacade}">
+											<Grid
+												VerticalAlignment="Top">
+												<Grid.RowDefinitions>
+													<RowDefinition
+														Height="Auto" />
+													<RowDefinition
+														Height="0" />
+													<RowDefinition
+														Height="Auto" />
+													<RowDefinition
+														Height="0" />
+													<RowDefinition
+														Height="Auto" />
+													<RowDefinition
+														Height="0" />
+													<RowDefinition
+														Height="Auto" />
+													<RowDefinition
+														Height="0" />
+													<RowDefinition
+														Height="Auto" />
+													<RowDefinition
+														Height="*" />
+												</Grid.RowDefinitions>
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition
+														Width="25" />
+													<ColumnDefinition
+														Width="60" />
+													<ColumnDefinition />
+												</Grid.ColumnDefinitions>
+												<FrameworkElement.Resources>
+													<ResourceDictionary>
+														<LinearGradientBrush
+															StartPoint="0.5, 0"
+															EndPoint="0.5,1"
+															x:Key="brdRepositoryEntryUnselected">
+															<GradientStop
+																Offset="0"
+																Color="#880000AA" />
+															<GradientStop
+																Offset="0.9"
+																Color="#880000AA" />
+															<GradientStop
+																Offset="1"
+																Color="#220000EE" />
+														</LinearGradientBrush>
+														<LinearGradientBrush
+															StartPoint="0.5, 0"
+															EndPoint="0.5,1"
+															x:Key="brdRepositoryEntrySelected">
+															<GradientStop
+																Offset="0"
+																Color="Maroon" />
+															<GradientStop
+																Offset="0.9"
+																Color="Maroon" />
+															<GradientStop
+																Offset="1"
+																Color="#22EE0000" />
+														</LinearGradientBrush>
+														<Style
+															x:Key="RepositoryEntryHeaderBarStyle"
+															TargetType="{x:Type StackPanel}">
+															<Style.Triggers>
+																<DataTrigger
+																	Value="False"
+																	Binding="{Binding Path=IsSelected}">
+																	<Setter
+																		Property="Background"
+																		Value="{StaticResource brdRepositoryEntryUnselected}" />
+																</DataTrigger>
+																<DataTrigger
+																	Value="True"
+																	Binding="{Binding Path=IsSelected}">
+																	<Setter
+																		Property="Background"
+																		Value="{StaticResource brdRepositoryEntrySelected}" />
+																</DataTrigger>
+															</Style.Triggers>
+														</Style>
+														<Style
+															x:Key="RepositoryEntryHeaderStyle"
+															TargetType="{x:Type TextBlock}">
+															<Setter
+																Property="FontSize"
+																Value="13" />
+															<Setter
+																Property="HorizontalAlignment"
+																Value="Left" />
+															<Style.Triggers>
+																<DataTrigger
+																	Value="True"
+																	Binding="{Binding Path=IsSelected}">
+																	<Setter
+																		Property="Foreground"
+																		Value="#FFFFFFFF" />
+																	<Setter
+																		Property="FontWeight"
+																		Value="Normal" />
+																</DataTrigger>
+																<DataTrigger
+																	Value="False"
+																	Binding="{Binding Path=IsSelected}">
+																	<Setter
+																		Property="Foreground"
+																		Value="#FFFFFFFF" />
+																	<Setter
+																		Property="FontWeight"
+																		Value="Normal" />
+																</DataTrigger>
+															</Style.Triggers>
+														</Style>
+														<Style
+															x:Key="RepositoryEntryLabelStyle"
+															TargetType="{x:Type TextBlock}">
+															<Setter
+																Property="FontSize"
+																Value="10" />
+															<Setter
+																Property="Foreground"
+																Value="#FF000000" />
+															<Setter
+																Property="Margin"
+																Value="0 7 0 0" />
+															<Setter
+																Property="VerticalAlignment"
+																Value="Top" />
+														</Style>
+														<Style
+															x:Key="RepositoryEntryDetailStyle"
+															TargetType="{x:Type TextBlock}">
+															<Setter
+																Property="FontSize"
+																Value="12" />
+															<Setter
+																Property="Foreground"
+																Value="#FF000000" />
+															<Setter
+																Property="Margin"
+																Value="0 5 5 0" />
+															<Setter
+																Property="VerticalAlignment"
+																Value="Top" />
+														</Style>
+													</ResourceDictionary>
+												</FrameworkElement.Resources>
+												<Border
+													Name="HeaderMask"
+													Background="#FFFFFFFF"
+													CornerRadius="8 8 0 0"
+													BorderThickness="0"
+													Margin="1 0 0 1"
+													Grid.Row="0"
+													Grid.Column="0"
+													Grid.ColumnSpan="5" />
+												<StackPanel
+													HorizontalAlignment="Stretch"
+													VerticalAlignment="Stretch"
+													Margin="-1"
+													Grid.Row="0"
+													Grid.Column="0"
+													Grid.ColumnSpan="5"
+													Style="{StaticResource RepositoryEntryHeaderBarStyle}">
+													<UIElement.OpacityMask>
+														<VisualBrush
+															Visual="{Binding ElementName=HeaderMask}" />
+													</UIElement.OpacityMask>
+												</StackPanel>
+												<CheckBox
+													VerticalAlignment="Bottom"
+													VerticalContentAlignment="Bottom"
+													Margin="5 5 0 0"
+													Grid.Row="0"
+													Grid.Column="0"
+													IsChecked="{Binding Path=IsSelected, Mode=TwoWay}" />
+												<Grid
+													Margin="0 5 0 0"
+													Row="0"
+													Column="1"
+													ColumnSpan="4">
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition />
+														<ColumnDefinition
+															Width="Auto" />
+														<ColumnDefinition
+															Width="20" />
+													</Grid.ColumnDefinitions>
+													<TextBlock
+														Margin="0 0 0 3"
+														VerticalAlignment="Bottom"
+														Grid.Column="0"
+														Style="{StaticResource RepositoryEntryHeaderStyle}"
+														Text="{Binding Path=Entry.Name}" />
+													<Image
+														Source="pack://application:,,,/Resources/Warning.png"
+														ToolTip="This package has not been tested."
+														Width="16"
+														Height="16"
+														Grid.Column="2"
+														Visibility="{Binding Path=Entry.IsTested, ConverterParameter=collapsed, Converter={StaticResource ConverterBooleanToVisibility}}" />
+												</Grid>
+												<Image
+													Source="pack://application:,,,/Resources/RecentPackage.png"
+													ToolTip="This package has been added or updated since the last time you browsed the Library."
+													VerticalAlignment="Top"
+													HorizontalAlignment="Left"
+													Margin="1 8 1 5"
+													Width="20"
+													Height="50"
+													Grid.Row="2"
+													Grid.RowSpan="8"
+													Visibility="{Binding Path=IsNew, Converter={StaticResource ConverterBooleanToVisibility}}" />
+												<TextBlock
+													Text="Category: "
+													Grid.Row="2"
+													Grid.Column="1"
+													Style="{StaticResource RepositoryEntryLabelStyle}" />
+												<TextBlock
+													Grid.Row="2"
+													Grid.Column="2"
+													Style="{StaticResource RepositoryEntryDetailStyle}"
+													Text="{Binding Path=FullCategory}" />
+												<TextBlock
+													Text="Credits: "
+													Grid.Row="4"
+													Grid.Column="1"
+													Style="{StaticResource RepositoryEntryLabelStyle}"
+													Visibility="{Binding Path=Entry.Credits, Converter={StaticResource ConverterStringNullOrEmptyToVisibility}}" />
+												<TextBlock
+													Grid.Row="4"
+													Grid.Column="2"
+													Grid.ColumnSpan="3"
+													Style="{StaticResource RepositoryEntryDetailStyle}"
+													Text="{Binding Path=Entry.Credits}"
+													Visibility="{Binding Path=Entry.Credits, Converter={StaticResource ConverterStringNullOrEmptyToVisibility}}" />
+												<TextBlock
+													Text="Modified: "
+													Grid.Row="6"
+													Grid.Column="1"
+													Style="{StaticResource RepositoryEntryLabelStyle}" />
+												<TextBlock
+													Grid.Row="6"
+													Grid.Column="2"
+													Grid.ColumnSpan="3"
+													Style="{StaticResource RepositoryEntryDetailStyle}"
+													Text="{Binding Path=Entry.ModifiedGMT.LocalDateTime, ConverterParameter={}{0:yyyy/MM/dd}, Converter={StaticResource ConverterStringFormat}}" />
+												<TextBlock
+													Text="Comments: "
+													Grid.Row="8"
+													Grid.Column="1"
+													Style="{StaticResource RepositoryEntryLabelStyle}"
+													Visibility="{Binding Path=Entry.Comments, Converter={StaticResource ConverterStringNullOrEmptyToVisibility}}" />
+												<TextBlock
+													TextWrapping="Wrap"
+													HorizontalAlignment="Left"
+													Grid.Row="8"
+													Grid.Column="2"
+													Style="{StaticResource RepositoryEntryDetailStyle}"
+													Text="{Binding Path=Entry.Comments}"
+													Visibility="{Binding Path=Entry.Comments, Converter={StaticResource ConverterStringNullOrEmptyToVisibility}}" />
+											</Grid>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ListView>
+								<StackPanel
+									HorizontalAlignment="Right"
+									Orientation="Horizontal"
+									Grid.Row="2">
+									<Button
+										Margin="0 0 5 0"
+										Width="170"
+										VerticalContentAlignment="Center"
+										Command="{Binding Path=DownloadRepositoryEntriesCommand, RelativeSource={RelativeSource TemplatedParent}}"
+										IsEnabled="{Binding Path=EntriesSelected, ConverterParameter=1|1000, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToBoolean}}">
+										<ContentControl.Content>
+											<Label
+												VerticalAlignment="Center"
+												VerticalContentAlignment="Center"
+												FontSize="13"
+												Content="{Binding Path=EntriesSelected, ConverterParameter='Download {0} Package(s)', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterStringFormat}}" />
+										</ContentControl.Content>
+									</Button>
+									<Button
+										Content="Cancel"
+										Width="80"
+										FontSize="13"
+										Command="{Binding Path=DeclineCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+							</Grid>
+						</shared:DialogEditor>
+						<shared:DialogEditor
+							Title="Merge"
+							MinWidth="600"
+							DialogVerticalAlignment="Stretch"
+							DialogHorizontalAlignment="Stretch"
+							DialogMargin="30"
+							Visibility="{Binding Path=Status, ConverterParameter=4|4, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<Grid
+								HorizontalAlignment="Stretch"
+								VerticalAlignment="Stretch">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition
+										Width="*"
+										MinWidth="50" />
+									<ColumnDefinition
+										Width="Auto" />
+									<ColumnDefinition
+										Width="*"
+										MinWidth="50" />
+								</Grid.ColumnDefinitions>
+								<StackPanel
+									Orientation="Horizontal"
+									Grid.Row="0"
+									Grid.Column="0"
+									Grid.ColumnSpan="3"
+									Margin="5 0 0 0">
+									<CheckBox
+										Margin="0 0 5 0"
+										IsChecked="{Binding Path=AutomaticMerge, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Label
+										Content="Automatically merge package for me"
+										Width="200"
+										MaxWidth="200" />
+								</StackPanel>
+								<Grid
+									Row="1"
+									Column="0"
+									Margin="0 5"
+									VerticalAlignment="Stretch">
+									<Grid.RowDefinitions>
+										<RowDefinition
+											Height="Auto" />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<TextBlock
+										Text="Shared Triggers"
+										Grid.Row="0" />
+									<TreeView
+										Grid.Row="1"
+										ItemsSource="{Binding Path=SourceRootVM.ChildGroups, RelativeSource={RelativeSource TemplatedParent}}"
+										IsEnabled="{Binding Path=AutomaticMerge, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanNegate}}">
+										<i:Interaction.Behaviors>
+											<shared:TreeViewDragBehavior />
+										</i:Interaction.Behaviors>
+										<FrameworkElement.Resources>
+											<ResourceDictionary>
+												<HierarchicalDataTemplate
+													x:Key="{DataTemplateKey {x:Type local:TriggerGroupViewModel}}"
+													DataType="{x:Type local:TriggerGroupViewModel}"
+													ItemsSource="{Binding Path=Children}">
+													<StackPanel
+														Orientation="Horizontal"
+														Margin="0 2">
+														<Image
+															Source="pack://application:,,,/Resources/TriggerGroup.png"
+															Margin="0 0 4 0" />
+														<TextBlock
+															Text="{Binding Path=TriggerGroup.Name}" />
+													</StackPanel>
+												</HierarchicalDataTemplate>
+												<DataTemplate
+													x:Key="{DataTemplateKey {x:Type local:TriggerViewModel}}"
+													DataType="{x:Type local:TriggerViewModel}">
+													<StackPanel
+														Orientation="Horizontal"
+														Margin="0 2">
+														<Image
+															Source="pack://application:,,,/Resources/Trigger.png"
+															Margin="0 0 3 0" />
+														<TextBlock
+															Text="{Binding Path=Trigger.Name}" />
+													</StackPanel>
+												</DataTemplate>
+											</ResourceDictionary>
+										</FrameworkElement.Resources>
+									</TreeView>
+								</Grid>
+								<GridSplitter
+									HorizontalAlignment="Right"
+									VerticalAlignment="Stretch"
+									Grid.Row="1"
+									Grid.Column="1"
+									ResizeBehavior="PreviousAndNext"
+									Width="2"
+									Background="#00FFFFFF" />
+								<Grid
+									Row="1"
+									Column="2"
+									Margin="0 5"
+									VerticalAlignment="Stretch">
+									<Grid.RowDefinitions>
+										<RowDefinition
+											Height="Auto" />
+										<RowDefinition />
+									</Grid.RowDefinitions>
+									<TextBlock
+										Text="Your Triggers"
+										Grid.Row="0" />
+									<TreeView
+										Grid.Row="1"
+										ItemsSource="{Binding Path=TargetRootVM.ChildGroups, RelativeSource={RelativeSource TemplatedParent}}"
+										IsEnabled="{Binding Path=AutomaticMerge, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanNegate}}">
+										<i:Interaction.Behaviors>
+											<shared:TreeViewDropBehavior
+												IsDropAllowedCommand="{Binding Path=IsDropAllowedCommand, RelativeSource={RelativeSource TemplatedParent}}"
+												DropCommand="{Binding Path=MoveTriggerOrGroupCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										</i:Interaction.Behaviors>
+										<FrameworkElement.Resources>
+											<ResourceDictionary>
+												<HierarchicalDataTemplate
+													x:Key="{DataTemplateKey {x:Type local:TriggerGroupViewModel}}"
+													DataType="{x:Type local:TriggerGroupViewModel}"
+													ItemsSource="{Binding Path=Children}">
+													<StackPanel
+														Orientation="Horizontal"
+														Margin="0 2">
+														<FrameworkElement.Style>
+															<Style
+																TargetType="{x:Type StackPanel}">
+																<Style.Triggers>
+																	<DataTrigger
+																		Value="True"
+																		Binding="{Binding Path=TriggerGroup.NeedsMerge}">
+																		<Setter
+																			Property="Background"
+																			Value="#FFFFB6C1" />
+																	</DataTrigger>
+																</Style.Triggers>
+															</Style>
+														</FrameworkElement.Style>
+														<Image
+															Source="pack://application:,,,/Resources/TriggerGroup.png"
+															Margin="0 0 4 0" />
+														<TextBlock
+															Text="{Binding Path=TriggerGroup.Name}" />
+													</StackPanel>
+												</HierarchicalDataTemplate>
+												<DataTemplate
+													x:Key="{DataTemplateKey {x:Type local:TriggerViewModel}}"
+													DataType="{x:Type local:TriggerViewModel}">
+													<StackPanel
+														Orientation="Horizontal"
+														Margin="0 2">
+														<FrameworkElement.Style>
+															<Style
+																TargetType="{x:Type StackPanel}">
+																<Style.Triggers>
+																	<DataTrigger
+																		Value="True"
+																		Binding="{Binding Path=Trigger.NeedsMerge}">
+																		<Setter
+																			Property="Background"
+																			Value="#FFFFB6C1" />
+																	</DataTrigger>
+																</Style.Triggers>
+															</Style>
+														</FrameworkElement.Style>
+														<Image
+															Source="pack://application:,,,/Resources/Trigger.png"
+															Margin="0 0 3 0" />
+														<TextBlock
+															Text="{Binding Path=Trigger.Name}" />
+													</StackPanel>
+												</DataTemplate>
+											</ResourceDictionary>
+										</FrameworkElement.Resources>
+									</TreeView>
+								</Grid>
+								<TextBlock
+									TextWrapping="Wrap"
+									Grid.Row="2"
+									Grid.Column="0"
+									Grid.ColumnSpan="3"
+									Margin="0 0 0 10"
+									Text="Drag trigger groups or triggers from the selected package (on the left) and drop them to the desired triggers groups (on the right) , or select the &quot;Automatically Merge&quot; checkbox.  Click Merge to finishing merging the triggers and groups into your environment." />
+								<StackPanel
+									Orientation="Horizontal"
+									Grid.Row="3"
+									Grid.Column="0"
+									Grid.ColumnSpan="3"
+									HorizontalAlignment="Right">
+									<Button
+										Content="Merge"
+										Width="60"
+										Margin="0 0 5 0"
+										Command="{Binding Path=MergeCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Content="Cancel"
+										Width="60"
+										Command="{Binding Path=DeclineCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+							</Grid>
+						</shared:DialogEditor>
+						<shared:SimpleDialog
+							Title="Error"
+							BorderColor="#FF8B0000"
+							ShowOKButton="True"
+							OKButtonText="OK"
+							Visibility="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}"
+							Message="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}}"
+							OKButtonCommand="{Binding Path=CloseErrorCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:ApplicationUpdateControl}"
+		TargetType="{x:Type local:ApplicationUpdateControl}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:ApplicationUpdateControl}">
+					<Grid
+						MinWidth="250">
+						<shared:DialogOverlay
+							Title="Update"
+							Visibility="{TemplateBinding UIElement.Visibility}"
+							VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+							<StackPanel
+								HorizontalAlignment="Stretch"
+								VerticalAlignment="Stretch">
+								<TextBlock
+									Text="Checking for updates..."
+									Visibility="{Binding Path=Status, ConverterParameter=10|10, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}" />
+								<TextBlock
+									Text="Updating..."
+									Visibility="{Binding Path=Status, ConverterParameter=11|11, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}" />
+								<TextBlock
+									Text="This application can not be updated."
+									Visibility="{Binding Path=Status, ConverterParameter=1|1, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}" />
+								<TextBlock
+									Text="{Binding Path=ErrorMessage, RelativeSource={RelativeSource TemplatedParent}}"
+									Visibility="{Binding Path=Status, ConverterParameter=2|2, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}" />
+								<TextBlock
+									Text="Application is up to date."
+									Visibility="{Binding Path=Status, ConverterParameter=3|3, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}" />
+								<Button
+									Content="OK"
+									Width="60"
+									FontSize="13"
+									HorizontalAlignment="Right"
+									Margin="0 10 5 5"
+									Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}"
+									Visibility="{Binding Path=Status, ConverterParameter=1|3, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}" />
+							</StackPanel>
+						</shared:DialogOverlay>
+						<shared:DialogOverlay
+							Title="Update Available"
+							ContentWidth="375"
+							ContentHeight="120"
+							Visibility="{Binding Path=Status, ConverterParameter=4|4, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterInRangeToVisibility}}">
+							<Grid
+								VerticalAlignment="Center"
+								HorizontalAlignment="Center"
+								Margin="10 0 0 0">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="10" />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<TextBlock
+									Text="A new version of GINA is available.  Do you wish to download it?"
+									Grid.Row="0" />
+								<TextBlock
+									Grid.Row="2"
+									Text="{Binding Path=CurrentVersion, ConverterParameter='Current Version: {0}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterStringFormat}}" />
+								<TextBlock
+									Grid.Row="4"
+									Text="{Binding Path=NewVersion, ConverterParameter='New Version: {0}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterStringFormat}}" />
+								<Button
+									Content="View the Change Log"
+									Grid.Row="6"
+									Style="{StaticResource LinkButtonStyle}"
+									Command="{Binding Path=OpenChangeLogCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								<StackPanel
+									Orientation="Horizontal"
+									HorizontalAlignment="Right"
+									Grid.Row="8"
+									Margin="0 0 10 5">
+									<Button
+										Width="60"
+										Margin="0 0 10 0"
+										Content="Yes"
+										Command="{Binding Path=DownloadCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Width="60"
+										Content="No"
+										Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+							</Grid>
+						</shared:DialogOverlay>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:EverquestTriggerSetSelector}"
+		TargetType="{x:Type local:EverquestTriggerSetSelector}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:EverquestTriggerSetSelector}">
+					<shared:DialogOverlay
+						MinWidth="250"
+						Title="In-game Source"
+						ShowDialogAlignButtons="True"
+						Visibility="{TemplateBinding UIElement.Visibility}"
+						VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+						<Grid
+							Width="400"
+							Height="400">
+							<Grid.RowDefinitions>
+								<RowDefinition
+									Height="Auto" />
+								<RowDefinition />
+								<RowDefinition
+									Height="Auto" />
+							</Grid.RowDefinitions>
+							<TextBlock
+								TextWrapping="Wrap"
+								Text="Select the trigger set from the character that you wish to import."
+								Grid.Row="0"
+								Margin="5" />
+							<TreeView
+								x:Name="tvTriggerSet"
+								Grid.Row="1"
+								ItemsSource="{Binding Path=TriggerSets, RelativeSource={RelativeSource TemplatedParent}}">
+								<i:Interaction.Triggers>
+									<i:EventTrigger
+										EventName="SelectedItemChanged">
+										<cmd:EventToCommand
+											Command="{Binding SelectedTriggerSetChangedCommand, RelativeSource={RelativeSource TemplatedParent}}"
+											CommandParameter="{Binding ElementName=tvTriggerSet, Path=SelectedValue}" />
+									</i:EventTrigger>
+									<i:EventTrigger
+										EventName="MouseDoubleClick">
+										<cmd:EventToCommand
+											Command="{Binding EditTriggerOrGroupCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									</i:EventTrigger>
+								</i:Interaction.Triggers>
+								<FrameworkElement.Resources>
+									<ResourceDictionary>
+										<HierarchicalDataTemplate
+											x:Key="{DataTemplateKey {x:Type local:EverquestFolderViewModel}}"
+											DataType="{x:Type local:EverquestFolderViewModel}"
+											ItemsSource="{Binding Path=Children}">
+											<StackPanel
+												Orientation="Horizontal"
+												Margin="0 2">
+												<Image
+													Source="pack://application:,,,/Resources/Trigger.png"
+													Margin="0 0 4 0"
+													Visibility="{Binding Path=IsTriggerSet, Converter={StaticResource ConverterBooleanToVisibility}}" />
+												<TextBlock
+													Text="{Binding Path=DisplayName}" />
+											</StackPanel>
+										</HierarchicalDataTemplate>
+									</ResourceDictionary>
+								</FrameworkElement.Resources>
+							</TreeView>
+							<StackPanel
+								Orientation="Horizontal"
+								HorizontalAlignment="Right"
+								Grid.Row="2">
+								<Button
+									Content="Import"
+									Command="{Binding Path=ImportCommand, RelativeSource={RelativeSource TemplatedParent}}"
+									IsEnabled="{Binding Path=SelectedTriggerSet, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToBoolean}}" />
+								<Button
+									Content="Cancel"
+									Margin="5 0 0 0"
+									Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+							</StackPanel>
+						</Grid>
+					</shared:DialogOverlay>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:EverquestCharacterSetSelector}"
+		TargetType="{x:Type local:EverquestCharacterSetSelector}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:EverquestCharacterSetSelector}">
+					<shared:DialogOverlay
+						Title="In-game Target"
+						ShowDialogAlignButtons="True"
+						Visibility="{TemplateBinding UIElement.Visibility}"
+						VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+						<Grid
+							Width="400"
+							Height="400">
+							<Grid.RowDefinitions>
+								<RowDefinition
+									Height="Auto" />
+								<RowDefinition />
+								<RowDefinition
+									Height="Auto" />
+								<RowDefinition
+									Height="Auto" />
+							</Grid.RowDefinitions>
+							<TextBlock
+								TextWrapping="Wrap"
+								Text="Select the Everquest characters and trigger set to which you wish to export these triggers, and click Export."
+								Grid.Row="0"
+								Margin="5" />
+							<TreeView
+								x:Name="tvCharacters"
+								Grid.Row="1"
+								ItemsSource="{Binding Path=Characters, RelativeSource={RelativeSource TemplatedParent}}">
+								<FrameworkElement.Resources>
+									<ResourceDictionary>
+										<HierarchicalDataTemplate
+											x:Key="{DataTemplateKey {x:Type local:EverquestFolderViewModel}}"
+											DataType="{x:Type local:EverquestFolderViewModel}"
+											ItemsSource="{Binding Path=Children}">
+											<StackPanel
+												Orientation="Horizontal"
+												Margin="0 2">
+												<CheckBox
+													Margin="0 0 2 0"
+													Width="15"
+													Visibility="{Binding Path=IsCharacter, Converter={StaticResource ConverterBooleanToVisibility}}"
+													IsChecked="{Binding Path=IsSelected, Mode=TwoWay}" />
+												<TextBlock
+													Text="{Binding Path=DisplayName}" />
+											</StackPanel>
+										</HierarchicalDataTemplate>
+									</ResourceDictionary>
+								</FrameworkElement.Resources>
+							</TreeView>
+							<StackPanel
+								Orientation="Horizontal"
+								Grid.Row="2"
+								Margin="5 10 5 0">
+								<Label
+									Content="Trigger Set Name" />
+								<ComboBox
+									Width="150"
+									ItemsSource="{Binding Path=TriggerSets, RelativeSource={RelativeSource TemplatedParent}}"
+									SelectedItem="{Binding Path=SelectedTriggerSet, Mode=OneWayToSource, RelativeSource={RelativeSource TemplatedParent}}" />
+							</StackPanel>
+							<StackPanel
+								Orientation="Horizontal"
+								HorizontalAlignment="Right"
+								Grid.Row="3"
+								Margin="5 10 5 5">
+								<Button
+									Content="Export"
+									Command="{Binding Path=ExportCommand, RelativeSource={RelativeSource TemplatedParent}}"
+									IsEnabled="{Binding Path=CanExport, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Button
+									Content="Cancel"
+									Margin="5 0 0 0"
+									Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+							</StackPanel>
+						</Grid>
+					</shared:DialogOverlay>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:TriggerNotificationEditor}"
+		TargetType="{x:Type local:TriggerNotificationEditor}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:TriggerNotificationEditor}">
+					<StackPanel
+						HorizontalAlignment="Stretch">
+						<GroupBox
+							Margin="0 0 0 10">
+							<HeaderedContentControl.Header>
+								<TextBlock
+									Text="Text Settings"
+									FontWeight="Bold" />
+							</HeaderedContentControl.Header>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition
+										Width="Auto" />
+									<ColumnDefinition />
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+								</Grid.RowDefinitions>
+								<CheckBox
+									Grid.Column="0"
+									Grid.Row="0"
+									IsChecked="{Binding Path=UseText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+									<Label
+										Content="Display Text" />
+								</CheckBox>
+								<TextBox
+									Grid.Column="1"
+									Grid.Row="0"
+									Text="{Binding Path=DisplayText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+									IsEnabled="{Binding Path=UseText, RelativeSource={RelativeSource TemplatedParent}}" />
+								<CheckBox
+									Grid.Column="0"
+									Grid.Row="2"
+									IsChecked="{Binding Path=CopyToClipboard, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+									<Label
+										Content="Clipboard Text" />
+								</CheckBox>
+								<TextBox
+									Grid.Column="1"
+									Grid.Row="2"
+									Text="{Binding Path=ClipboardText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+									IsEnabled="{Binding Path=CopyToClipboard, RelativeSource={RelativeSource TemplatedParent}}" />
+							</Grid>
+						</GroupBox>
+						<GroupBox
+							Margin="0 0 0 10">
+							<HeaderedContentControl.Header>
+								<TextBlock
+									Text="Audio Settings"
+									FontWeight="Bold" />
+							</HeaderedContentControl.Header>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition
+										Width="50" />
+									<ColumnDefinition
+										Width="5" />
+									<ColumnDefinition
+										Width="Auto" />
+									<ColumnDefinition
+										Width="5" />
+									<ColumnDefinition />
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+								</Grid.RowDefinitions>
+								<RadioButton
+									Content="No Sound"
+									GroupName="SoundMethod"
+									Grid.Row="0"
+									Grid.Column="0"
+									Grid.ColumnSpan="5"
+									IsChecked="{Binding Path=DontUseSound, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+								<RadioButton
+									Content="Use Text To Speech"
+									GroupName="SoundMethod"
+									Grid.Row="2"
+									Grid.Column="0"
+									Grid.ColumnSpan="5"
+									IsChecked="{Binding Path=UseTextToVoice, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Label
+									Content="Text to Say"
+									Grid.Row="4"
+									Grid.Column="2"
+									IsEnabled="{Binding Path=UseTextToVoice, RelativeSource={RelativeSource TemplatedParent}}" />
+								<TextBox
+									Grid.Row="4"
+									Grid.Column="4"
+									Text="{Binding Path=TextToVoiceText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+									IsEnabled="{Binding Path=UseTextToVoice, RelativeSource={RelativeSource TemplatedParent}}" />
+								<CheckBox
+									Grid.Row="6"
+									Grid.Column="2"
+									Grid.ColumnSpan="3"
+									IsChecked="{Binding Path=InterruptSpeech, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+									IsEnabled="{Binding Path=UseTextToVoice, RelativeSource={RelativeSource TemplatedParent}}">
+									<Label
+										Content="Interrupt Speech" />
+								</CheckBox>
+								<RadioButton
+									Content="Play Sound File"
+									GroupName="SoundMethod"
+									Grid.Row="8"
+									Grid.Column="0"
+									Grid.ColumnSpan="5"
+									IsChecked="{Binding Path=PlayMediaFile, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Label
+									Content="Sound File"
+									Grid.Row="10"
+									Grid.Column="2"
+									IsEnabled="{Binding Path=PlayMediaFile, RelativeSource={RelativeSource TemplatedParent}}" />
+								<StackPanel
+									Orientation="Horizontal"
+									Grid.Row="10"
+									Grid.Column="4"
+									IsEnabled="{Binding Path=PlayMediaFile, RelativeSource={RelativeSource TemplatedParent}}">
+									<TextBox
+										HorizontalAlignment="Stretch"
+										Width="300"
+										Text="{Binding Path=MediaFileName, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Content="..."
+										Width="30"
+										Height="20"
+										Command="{Binding Path=FindSoundFileCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+								<Label
+									Content="Test"
+									Grid.Row="12"
+									Grid.Column="0" />
+								<StackPanel
+									Orientation="Horizontal"
+									Grid.Row="12"
+									Grid.Column="2"
+									Grid.ColumnSpan="3">
+									<ComboBox
+										Width="150"
+										DisplayMemberPath="Character.DisplayName"
+										ItemsSource="{Binding Path=App.Data.Characters}"
+										SelectedItem="{Binding Path=SelectedVoiceCharacter, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Margin="3 0 0 0"
+										Command="{Binding Path=PlaySampleCommand, RelativeSource={RelativeSource TemplatedParent}}"
+										IsEnabled="{Binding Path=SelectedVoiceCharacter, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToBoolean}}">
+										<Control.Template>
+											<ControlTemplate>
+												<Image
+													Source="pack://application:,,,/Resources/Play16.png"
+													Height="15" />
+											</ControlTemplate>
+										</Control.Template>
+									</Button>
+								</StackPanel>
+							</Grid>
+						</GroupBox>
+					</StackPanel>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:PhoneticDictionaryEditor}"
+		TargetType="{x:Type local:PhoneticDictionaryEditor}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:PhoneticDictionaryEditor}">
+					<Grid
+						Visibility="{TemplateBinding UIElement.Visibility}"
+						VerticalAlignment="Stretch">
+						<shared:DialogEditor
+							Title="Gnomish Articulator"
+							ShowDialogAlignButtons="True"
+							DialogVerticalAlignment="Stretch"
+							DialogMargin="0 40"
+							Visibility="{TemplateBinding UIElement.Visibility}"
+							VisibilityChangedCommand="{Binding Path=VisibilityChangedCommand, RelativeSource={RelativeSource TemplatedParent}}">
+							<Grid
+								Width="400"
+								VerticalAlignment="Stretch">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<GroupBox
+									Grid.Row="0"
+									HorizontalAlignment="Stretch">
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="Search"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid
+										HorizontalAlignment="Stretch">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="45" />
+											<ColumnDefinition />
+											<ColumnDefinition
+												Width="80" />
+										</Grid.ColumnDefinitions>
+										<Label
+											Content="Find:"
+											Grid.Column="0" />
+										<TextBox
+											HorizontalAlignment="Stretch"
+											HorizontalContentAlignment="Left"
+											Grid.Column="1"
+											Text="{Binding Path=SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Button
+											HorizontalAlignment="Left"
+											Margin="5 0 0 0"
+											ToolTip="Add a new phonetic transform to the dictionary"
+											Grid.Column="2"
+											Command="{Binding Path=NewTransformCommand, RelativeSource={RelativeSource TemplatedParent}}">
+											<Control.Template>
+												<ControlTemplate>
+													<Image
+														Source="pack://application:,,,/Resources/Add.png"
+														Height="15" />
+												</ControlTemplate>
+											</Control.Template>
+										</Button>
+									</Grid>
+								</GroupBox>
+								<Grid
+									Row="1"
+									Margin="0 10 0 2">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="20" />
+										<ColumnDefinition
+											Width="20" />
+										<ColumnDefinition
+											Width="1*" />
+										<ColumnDefinition
+											Width="20" />
+										<ColumnDefinition
+											Width="1*" />
+									</Grid.ColumnDefinitions>
+									<Label
+										Content="Actual Word"
+										FontSize="12"
+										Grid.Column="2" />
+									<Label
+										Content="Phonetic Word"
+										FontSize="12"
+										Grid.Column="4" />
+								</Grid>
+								<ListView
+									ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+									HorizontalAlignment="Stretch"
+									HorizontalContentAlignment="Stretch"
+									Grid.Row="2"
+									ItemsSource="{Binding Path=Transforms, RelativeSource={RelativeSource TemplatedParent}}">
+									<ItemsControl.ItemContainerStyle>
+										<Style
+											TargetType="{x:Type ListViewItem}">
+											<Setter
+												Property="Background"
+												Value="#00FFFFFF" />
+											<Setter
+												Property="Template">
+												<Setter.Value>
+													<ControlTemplate
+														TargetType="{x:Type ListViewItem}">
+														<ContentPresenter
+															HorizontalAlignment="Stretch"
+															VerticalAlignment="Center"
+															SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+													</ControlTemplate>
+												</Setter.Value>
+											</Setter>
+										</Style>
+									</ItemsControl.ItemContainerStyle>
+									<ItemsControl.ItemTemplate>
+										<DataTemplate
+											x:Key="{DataTemplateKey {x:Type biz:PhoneticTransform}}"
+											DataType="{x:Type biz:PhoneticTransform}">
+											<Grid
+												HorizontalAlignment="Stretch"
+												Margin="0 0 0 2">
+												<Grid.ColumnDefinitions>
+													<ColumnDefinition
+														Width="20" />
+													<ColumnDefinition
+														Width="20" />
+													<ColumnDefinition
+														Width="1*" />
+													<ColumnDefinition
+														Width="20" />
+													<ColumnDefinition
+														Width="1*" />
+												</Grid.ColumnDefinitions>
+												<Button
+													Margin="3 0 0 0"
+													ToolTip="Edit this phonetic transform"
+													Grid.Column="0"
+													Command="{Binding Path=EditTransformCommand, RelativeSource={RelativeSource AncestorType={x:Type local:PhoneticDictionaryEditor}}}"
+													CommandParameter="{Binding}">
+													<Control.Template>
+														<ControlTemplate>
+															<Image
+																Source="pack://application:,,,/Resources/Edit.png"
+																Height="15" />
+														</ControlTemplate>
+													</Control.Template>
+												</Button>
+												<Button
+													Margin="3 0 0 0"
+													ToolTip="Remove this phonetic transform"
+													Grid.Column="1"
+													Command="{Binding Path=RemoveTransformCommand, RelativeSource={RelativeSource AncestorType={x:Type local:PhoneticDictionaryEditor}}}"
+													CommandParameter="{Binding}">
+													<Control.Template>
+														<ControlTemplate>
+															<Image
+																Source="pack://application:,,,/Resources/Delete.png"
+																Height="15" />
+														</ControlTemplate>
+													</Control.Template>
+												</Button>
+												<TextBlock
+													Grid.Column="2"
+													Text="{Binding Path=ActualWord}" />
+												<Button
+													Margin="3 0 0 0"
+													HorizontalAlignment="Left"
+													ToolTip="Say the phonetic word"
+													Grid.Column="3"
+													Command="{Binding Path=PlayTransformCommand, RelativeSource={RelativeSource AncestorType={x:Type local:PhoneticDictionaryEditor}}}"
+													CommandParameter="{Binding Path=PhoneticWord}">
+													<Control.Template>
+														<ControlTemplate>
+															<Image
+																Source="pack://application:,,,/Resources/Play16.png"
+																Height="15" />
+														</ControlTemplate>
+													</Control.Template>
+												</Button>
+												<TextBlock
+													Grid.Column="4"
+													Text="{Binding Path=PhoneticWord}" />
+											</Grid>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ListView>
+								<Grid
+									Row="3"
+									Margin="0 10 0 5">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="Auto" />
+										<ColumnDefinition />
+										<ColumnDefinition
+											Width="90" />
+									</Grid.ColumnDefinitions>
+									<Label
+										Content="Test with Character:"
+										Margin="0 0 10 0"
+										VerticalAlignment="Bottom"
+										Grid.Column="0" />
+									<ComboBox
+										Width="150"
+										HorizontalAlignment="Left"
+										VerticalAlignment="Bottom"
+										DisplayMemberPath="Character.DisplayName"
+										Grid.Column="1"
+										ItemsSource="{Binding Path=App.Data.Characters}"
+										SelectedItem="{Binding Path=SelectedVoiceCharacter, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Content="Close"
+										HorizontalAlignment="Right"
+										VerticalAlignment="Bottom"
+										FontSize="13"
+										Width="80"
+										Margin="5 0"
+										Grid.Column="2"
+										Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</Grid>
+							</Grid>
+						</shared:DialogEditor>
+						<shared:DialogEditor
+							Title="Phonetic Transform"
+							ShowDialogAlignButtons="True"
+							Visibility="{Binding Path=ShowNewTransformDialog, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition
+										Width="80" />
+									<ColumnDefinition
+										Width="5" />
+									<ColumnDefinition
+										Width="150" />
+									<ColumnDefinition
+										Width="5" />
+									<ColumnDefinition
+										Width="20" />
+								</Grid.ColumnDefinitions>
+								<Label
+									Content="Actual Word:"
+									Grid.Row="0"
+									Grid.Column="0" />
+								<TextBox
+									Grid.Row="0"
+									Grid.Column="2"
+									Text="{Binding Path=NewActualWord, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Label
+									Content="Phonetic Word:"
+									Grid.Row="2"
+									Grid.Column="0" />
+								<TextBox
+									Grid.Row="2"
+									Grid.Column="2"
+									Text="{Binding Path=NewPhoneticWord, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Button
+									Margin="3 0 0 0"
+									Grid.Row="2"
+									Grid.Column="4"
+									Command="{Binding Path=PlayTransformCommand, RelativeSource={RelativeSource AncestorType={x:Type local:PhoneticDictionaryEditor}}}"
+									CommandParameter="{Binding Path=NewPhoneticWord, RelativeSource={RelativeSource TemplatedParent}}">
+									<Control.Template>
+										<ControlTemplate>
+											<Image
+												Source="pack://application:,,,/Resources/Play16.png"
+												Height="15" />
+										</ControlTemplate>
+									</Control.Template>
+								</Button>
+								<StackPanel
+									HorizontalAlignment="Right"
+									Orientation="Horizontal"
+									Grid.Row="4"
+									Grid.Column="0"
+									Grid.ColumnSpan="5">
+									<Button
+										Content="Add"
+										Margin="5 0"
+										Width="80"
+										FontSize="13"
+										Command="{Binding Path=AddTransformCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+									<Button
+										Content="Cancel"
+										Width="80"
+										FontSize="13"
+										Command="{Binding Path=CancelTransformCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+							</Grid>
+						</shared:DialogEditor>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:LogSearchControl}"
+		TargetType="{x:Type local:LogSearchControl}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:LogSearchControl}">
+					<Grid
+						VerticalAlignment="Stretch"
+						HorizontalAlignment="Stretch">
+						<shared:DialogEditor
+							Title="Log Search"
+							DialogVerticalAlignment="Stretch"
+							DialogHorizontalAlignment="Stretch"
+							DialogMargin="30"
+							Visibility="{TemplateBinding UIElement.Visibility}">
+							<Grid
+								VerticalAlignment="Stretch"
+								HorizontalAlignment="Stretch">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+								</Grid.RowDefinitions>
+								<GroupBox
+									Grid.Row="0">
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="Search Options"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="Auto" />
+										</Grid.RowDefinitions>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="75" />
+											<ColumnDefinition />
+										</Grid.ColumnDefinitions>
+										<Label
+											Content="Character: "
+											Grid.Row="0"
+											Grid.Column="0" />
+										<ComboBox
+											Width="200"
+											DisplayMemberPath="Character.DisplayName"
+											Grid.Row="0"
+											Grid.Column="1"
+											ItemsSource="{Binding Path=App.Data.Characters}"
+											SelectedItem="{Binding Path=Character, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<Label
+											Content="Search:"
+											Grid.Row="4"
+											Grid.Column="0" />
+										<StackPanel
+											Orientation="Horizontal"
+											Grid.Row="4"
+											Grid.Column="2">
+											<RadioButton
+												GroupName="FilesToSearch"
+												Content="Current File"
+												VerticalAlignment="Bottom"
+												ToolTip="Only the current (active) file will be searched."
+												Margin="0 0 20 0"
+												IsChecked="{Binding Path=IncludeArchives, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanNegate}}" />
+											<RadioButton
+												GroupName="FilesToSearch"
+												Content="Current and Archived Files"
+												VerticalAlignment="Bottom"
+												ToolTip="The current file and any archived files will be searched."
+												IsChecked="{Binding Path=IncludeArchives, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										</StackPanel>
+										<Label
+											Content="Time Period:"
+											Grid.Row="6"
+											Grid.Column="0" />
+										<Grid
+											Margin="0"
+											Row="6"
+											Column="1">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition />
+												<ColumnDefinition
+													Width="10" />
+												<ColumnDefinition
+													Width="Auto" />
+												<ColumnDefinition
+													Width="10" />
+												<ColumnDefinition
+													Width="Auto" />
+												<ColumnDefinition
+													Width="10" />
+												<ColumnDefinition
+													Width="Auto" />
+											</Grid.ColumnDefinitions>
+											<StackPanel
+												Orientation="Horizontal">
+												<extToolkit:DateTimePicker
+													Format="Custom"
+													Width="180"
+													FormatString="MM/dd/yyyy hh:mm:ss tt"
+													Grid.Column="0"
+													Value="{Binding Path=StartDate, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+												<Label
+													Content=" to "
+													Grid.Column="1" />
+												<extToolkit:DateTimePicker
+													Format="Custom"
+													Width="180"
+													FormatString="MM/dd/yyyy hh:mm:ss tt"
+													Grid.Column="2"
+													Value="{Binding Path=EndDate, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+											</StackPanel>
+											<Button
+												Content="Any Time"
+												Width="80"
+												VerticalAlignment="Center"
+												Grid.Column="2"
+												CommandParameter="A"
+												Command="{Binding Path=SetTimePeriod, RelativeSource={RelativeSource TemplatedParent}}" />
+											<Button
+												Content="Last Hour"
+												Width="80"
+												VerticalAlignment="Center"
+												Grid.Column="4"
+												CommandParameter="H"
+												Command="{Binding Path=SetTimePeriod, RelativeSource={RelativeSource TemplatedParent}}" />
+											<Button
+												Content="Last Day"
+												Width="80"
+												VerticalAlignment="Center"
+												Grid.Column="6"
+												CommandParameter="D"
+												Command="{Binding Path=SetTimePeriod, RelativeSource={RelativeSource TemplatedParent}}" />
+										</Grid>
+										<Label
+											Content="Search for: "
+											Grid.Row="2"
+											Grid.Column="0" />
+										<Grid
+											Row="2"
+											Column="1">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition
+													Width="80" />
+												<ColumnDefinition
+													Width="5" />
+												<ColumnDefinition />
+												<ColumnDefinition
+													Width="5" />
+												<ColumnDefinition
+													Width="180" />
+												<ColumnDefinition
+													Width="5" />
+												<ColumnDefinition
+													Width="120" />
+											</Grid.ColumnDefinitions>
+											<RadioButton
+												GroupName="SearchType"
+												Content="Enabled Trigger Matches"
+												VerticalAlignment="Bottom"
+												ToolTip="This search will run each line through the triggers that are enabled for the character."
+												Margin="0 0 20 0"
+												Grid.Column="4"
+												IsChecked="{Binding Path=SearchType, Mode=TwoWay, ConverterParameter='{x:Static biz:LogSearchTypes.AllActiveTriggers}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+											<RadioButton
+												GroupName="SearchType"
+												Content="All Trigger Matches"
+												VerticalAlignment="Bottom"
+												ToolTip="This search will run each line through all of the triggers you have set up, whether they are enabled for the character or not."
+												Grid.Column="6"
+												IsChecked="{Binding Path=SearchType, Mode=TwoWay, ConverterParameter='{x:Static biz:LogSearchTypes.AllTriggers}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+											<RadioButton
+												GroupName="SearchType"
+												Content="Specific Text: "
+												VerticalAlignment="Bottom"
+												ToolTip="This search will search each line for the text you specify in the text box.  For each match found, the line will also be tested against the triggers that are enabled for the character."
+												Grid.Column="0"
+												IsChecked="{Binding Path=SearchType, Mode=TwoWay, ConverterParameter='{x:Static biz:LogSearchTypes.Text}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+											<TextBox
+												HorizontalAlignment="Stretch"
+												Margin="0 0 20 0"
+												Grid.Column="2"
+												Text="{Binding Path=SearchText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+												IsEnabled="{Binding Path=SearchType, ConverterParameter='{x:Static biz:LogSearchTypes.Text}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+										</Grid>
+										<Grid
+											Row="8"
+											Column="0"
+											ColumnSpan="2">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition />
+												<ColumnDefinition
+													Width="Auto" />
+												<ColumnDefinition
+													Width="Auto" />
+											</Grid.ColumnDefinitions>
+											<ProgressBar
+												Minimum="0"
+												Maximum="100"
+												Height="20"
+												HorizontalAlignment="Stretch"
+												HorizontalContentAlignment="Stretch"
+												Grid.Column="0"
+												Margin="0 0 10 0"
+												Value="{Binding Path=MatchProgress, RelativeSource={RelativeSource TemplatedParent}}"
+												Visibility="{Binding Path=SearchInProgress, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}" />
+											<StackPanel
+												Grid.Column="0"
+												Height="20"
+												Visibility="{Binding Path=LinesRead, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToVisibility}}">
+												<Grid
+													HorizontalAlignment="Left">
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition />
+														<ColumnDefinition
+															Width="10" />
+														<ColumnDefinition />
+														<ColumnDefinition
+															Width="10" />
+														<ColumnDefinition />
+													</Grid.ColumnDefinitions>
+													<TextBlock
+														Grid.Column="0"
+														Text="{Binding Path=LinesRead, ConverterParameter='Lines Read: {0:#,0}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterStringFormat}}" />
+													<TextBlock
+														Grid.Column="2"
+														Text="{Binding Path=LinesReadPerSecond, ConverterParameter='Lines Per Second: {0:#,0}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterStringFormat}}" />
+													<TextBlock
+														Grid.Column="4"
+														Text="{Binding Path=Matches.Count, ConverterParameter='Matches: {0:#,0}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterStringFormat}}" />
+												</Grid>
+											</StackPanel>
+											<Button
+												Content="Cancel"
+												HorizontalAlignment="Right"
+												Margin="10 0"
+												Grid.Column="1"
+												Width="80"
+												Command="{Binding Path=CancelSearchCommand, RelativeSource={RelativeSource TemplatedParent}}"
+												Visibility="{Binding Path=SearchInProgress, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}" />
+											<Button
+												Content="Search"
+												Margin="10 0"
+												Grid.Column="1"
+												Width="80"
+												Command="{Binding Path=SearchCommand, RelativeSource={RelativeSource TemplatedParent}}"
+												IsEnabled="{Binding Path=AllowSearch, RelativeSource={RelativeSource TemplatedParent}}"
+												Visibility="{Binding Path=SearchInProgress, ConverterParameter=collapsed, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}" />
+											<Button
+												Content="Close"
+												Grid.Column="2"
+												Width="80"
+												Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										</Grid>
+									</Grid>
+								</GroupBox>
+								<ListView
+									x:Name="SearchResults"
+									HorizontalAlignment="Stretch"
+									HorizontalContentAlignment="Left"
+									SelectionMode="Extended"
+									VerticalAlignment="Stretch"
+									ScrollViewer.CanContentScroll="True"
+									Grid.Row="2"
+									ItemsSource="{Binding Path=Matches, RelativeSource={RelativeSource TemplatedParent}}"
+									Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:LogSearchControl}}}">
+									<i:Interaction.Behaviors>
+										<shared:ListViewSizeColumnsBehavior
+											SizeList="142|0.3|0.65" />
+									</i:Interaction.Behaviors>
+									<i:Interaction.Triggers>
+										<i:EventTrigger
+											EventName="SelectionChanged">
+											<cmd:EventToCommand
+												PassEventArgsToCommand="True"
+												Command="{Binding Path=ResultSelectionChangedCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										</i:EventTrigger>
+									</i:Interaction.Triggers>
+									<FrameworkElement.Resources>
+										<ResourceDictionary>
+											<Style
+												x:Key="tbGrid"
+												TargetType="{x:Type TextBlock}">
+												<Setter
+													Property="FontSize"
+													Value="12" />
+											</Style>
+											<Style
+												x:Key="{x:Type GridViewColumnHeader}"
+												TargetType="{x:Type GridViewColumnHeader}">
+												<Setter
+													Property="HorizontalContentAlignment"
+													Value="Left" />
+											</Style>
+										</ResourceDictionary>
+									</FrameworkElement.Resources>
+									<FrameworkElement.ContextMenu>
+										<ContextMenu
+											DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Mode=Self}}"
+											Tag="{Binding Path=PlacementTarget.DataContext}">
+											<MenuItem
+												Header="Copy"
+												Command="Copy" />
+										</ContextMenu>
+									</FrameworkElement.ContextMenu>
+									<ListView.View>
+										<GridView>
+											<GridViewColumn
+												Header="Log Time">
+												<GridViewColumn.CellTemplate>
+													<DataTemplate>
+														<TextBlock
+															Style="{StaticResource tbGrid}"
+															Text="{Binding Path=LoggedTime, ConverterParameter='{}{0:MM/dd/yyyy hh:mm:ss tt}', Converter={StaticResource ConverterStringFormat}}"
+															Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:LogSearchControl}}}">
+															<FrameworkElement.ContextMenu>
+																<ContextMenu
+																	DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Mode=Self}}"
+																	Tag="{Binding Path=PlacementTarget.DataContext}">
+																	<FrameworkElement.Resources>
+																		<ResourceDictionary>
+																			<sys:Int32
+																				x:Key="Delay1">1</sys:Int32>
+																			<sys:Int32
+																				x:Key="Delay5">5</sys:Int32>
+																			<sys:Int32
+																				x:Key="Delay10">10</sys:Int32>
+																			<sys:String
+																				x:Key="DelayS">S</sys:String>
+																			<sys:String
+																				x:Key="DelayM">M</sys:String>
+																			<sys:String
+																				x:Key="DelayH">H</sys:String>
+																			<sys:String
+																				x:Key="DelayNext">Next</sys:String>
+																			<sys:String
+																				x:Key="DelayPrev">Prev</sys:String>
+																		</ResourceDictionary>
+																	</FrameworkElement.Resources>
+																	<MenuItem
+																		Header="Copy"
+																		Command="Copy" />
+																	<Separator />
+																	<MenuItem
+																		Header="View Next">
+																		<MenuItem
+																			Header="10 seconds"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchNextCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay10}" />
+																					<Binding
+																						Source="{StaticResource DelayS}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="1 minute"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchNextCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay1}" />
+																					<Binding
+																						Source="{StaticResource DelayM}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="5 minutes"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchNextCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay5}" />
+																					<Binding
+																						Source="{StaticResource DelayM}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="10 minutes"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchNextCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay10}" />
+																					<Binding
+																						Source="{StaticResource DelayM}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="1 hour"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchNextCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay1}" />
+																					<Binding
+																						Source="{StaticResource DelayH}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																	</MenuItem>
+																	<MenuItem
+																		Header="View Last">
+																		<MenuItem
+																			Header="10 seconds"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchPrevCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay10}" />
+																					<Binding
+																						Source="{StaticResource DelayS}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="1 minute"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchPrevCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay1}" />
+																					<Binding
+																						Source="{StaticResource DelayM}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="5 minutes"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchPrevCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay5}" />
+																					<Binding
+																						Source="{StaticResource DelayM}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="10 minutes"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchPrevCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay10}" />
+																					<Binding
+																						Source="{StaticResource DelayM}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																		<MenuItem
+																			Header="1 hour"
+																			DataContext="{Binding Path=Tag}"
+																			Command="{Binding Path=SearchPrevCommand}">
+																			<MenuItem.CommandParameter>
+																				<MultiBinding
+																					Converter="{StaticResource ConverterMultipleObject}">
+																					<Binding
+																						Path="DataContext.LoggedTime"
+																						RelativeSource="{RelativeSource TemplatedParent}" />
+																					<Binding
+																						Source="{StaticResource Delay1}" />
+																					<Binding
+																						Source="{StaticResource DelayH}" />
+																				</MultiBinding>
+																			</MenuItem.CommandParameter>
+																		</MenuItem>
+																	</MenuItem>
+																</ContextMenu>
+															</FrameworkElement.ContextMenu>
+														</TextBlock>
+													</DataTemplate>
+												</GridViewColumn.CellTemplate>
+											</GridViewColumn>
+											<GridViewColumn
+												Header="Trigger">
+												<GridViewColumn.CellTemplate>
+													<DataTemplate>
+														<StackPanel
+															Orientation="Horizontal">
+															<Button
+																ToolTip="Create New Trigger"
+																Command="{Binding Path=SelectTriggerGroupCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type local:LogSearchControl}}}"
+																CommandParameter="{Binding}"
+																Visibility="{Binding Path=MatchedTrigger, ConverterParameter=visible|collapsed, Converter={StaticResource ConverterNullToVisibility}}">
+																<Control.Template>
+																	<ControlTemplate>
+																		<Image
+																			Source="pack://application:,,,/Resources/Add.png"
+																			Height="14"
+																			Width="14"
+																			HorizontalAlignment="Center"
+																			VerticalAlignment="Center" />
+																	</ControlTemplate>
+																</Control.Template>
+															</Button>
+															<Button
+																ToolTip="Edit Trigger, and automatically overwrite the Trigger's Search Text with the Matched Text"
+																Command="{Binding Path=ReplaceTriggerTextCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type local:LogSearchControl}}}"
+																CommandParameter="{Binding}"
+																Visibility="{Binding Path=MatchedTrigger, ConverterParameter=collapsed|visible, Converter={StaticResource ConverterNullToVisibility}}">
+																<Control.Template>
+																	<ControlTemplate>
+																		<Image
+																			Source="pack://application:,,,/Resources/Replace.png"
+																			Height="14"
+																			Width="14"
+																			HorizontalAlignment="Center"
+																			VerticalAlignment="Center" />
+																	</ControlTemplate>
+																</Control.Template>
+															</Button>
+															<Button
+																ToolTipService.ShowDuration="30000"
+																FontSize="12"
+																Style="{StaticResource LinkButtonStyle}"
+																Content="{Binding Path=MatchedTrigger.Name}"
+																Command="{Binding Path=EditTriggerCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type local:LogSearchControl}}}"
+																CommandParameter="{Binding Path=MatchedTrigger}">
+																<FrameworkElement.ToolTip>
+																	<ToolTip
+																		Style="{StaticResource TriggerTooltip}"
+																		DataContext="{Binding Path=PlacementTarget.DataContext.MatchedTrigger, RelativeSource={RelativeSource Self}}" />
+																</FrameworkElement.ToolTip>
+															</Button>
+														</StackPanel>
+													</DataTemplate>
+												</GridViewColumn.CellTemplate>
+											</GridViewColumn>
+											<GridViewColumn
+												Header="Matched Text">
+												<GridViewColumn.CellTemplate>
+													<DataTemplate>
+														<TextBlock
+															Style="{StaticResource tbGrid}"
+															Text="{Binding Path=MatchedText}" />
+													</DataTemplate>
+												</GridViewColumn.CellTemplate>
+											</GridViewColumn>
+										</GridView>
+									</ListView.View>
+								</ListView>
+							</Grid>
+						</shared:DialogEditor>
+						<local:TriggerEditor
+							Visibility="{Binding Path=ShowTriggerEditor, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}"
+							SuggestedSearchText="{Binding Path=NewTriggerText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+							TriggerGroup="{Binding Path=SelectedTriggerGroup, RelativeSource={RelativeSource TemplatedParent}}"
+							Trigger="{Binding Path=EditingTrigger, RelativeSource={RelativeSource TemplatedParent}}" />
+						<shared:DialogEditor
+							Title="Choose Group"
+							DialogVerticalAlignment="Center"
+							DialogHorizontalAlignment="Center"
+							DialogMargin="30"
+							Visibility="{Binding Path=ShowGroupSelection, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}">
+							<Grid
+								Width="300"
+								Height="300">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<Label
+									Content="Select a Trigger Group for the new Trigger:"
+									FontWeight="Bold"
+									Grid.Row="0" />
+								<Border
+									BorderBrush="#FFA9A9A9"
+									BorderThickness="1"
+									Background="#FFFFFFFF"
+									Grid.Row="2">
+									<shared:TreeList
+										HorizontalAlignment="Stretch"
+										VerticalAlignment="Stretch"
+										SelectionMode="Single"
+										AllowDrop="False"
+										ImagePadding="2 2 4 2"
+										RootItem="{Binding Path=RootGroupViewModel, RelativeSource={RelativeSource TemplatedParent}}"
+										Tag="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:LogSearchControl}}}">
+										<i:Interaction.Triggers>
+											<i:EventTrigger
+												EventName="TreeSelectionChanged">
+												<cmd:EventToCommand
+													PassEventArgsToCommand="True"
+													Command="{Binding Path=SelectionChangedCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+											</i:EventTrigger>
+										</i:Interaction.Triggers>
+										<ItemsControl.ItemTemplate>
+											<DataTemplate
+												x:Key="{DataTemplateKey {x:Type local:TriggerGroupViewModel}}"
+												DataType="{x:Type local:TriggerGroupViewModel}">
+												<StackPanel
+													Orientation="Horizontal"
+													Height="22"
+													Focusable="True"
+													Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:LogSearchControl}}}">
+													<FrameworkElement.ContextMenu>
+														<ContextMenu
+															DataContext="{Binding Path=PlacementTarget.Tag, RelativeSource={RelativeSource Mode=Self}}">
+															<MenuItem
+																Header="Add Group"
+																IsEnabled="{Binding Path=SelectedTriggerGroup}"
+																Command="{Binding Path=AddTriggerGroupCommand}" />
+														</ContextMenu>
+													</FrameworkElement.ContextMenu>
+													<FrameworkElement.Style>
+														<Style
+															TargetType="{x:Type StackPanel}">
+															<Style.Triggers>
+																<DataTrigger
+																	Value="True"
+																	Binding="{Binding Path=IsSelected}">
+																	<Setter
+																		Property="Background"
+																		Value="#FF3399FF" />
+																</DataTrigger>
+															</Style.Triggers>
+														</Style>
+													</FrameworkElement.Style>
+													<Image
+														Source="pack://application:,,,/Resources/TriggerGroup.png"
+														Stretch="None"
+														Margin="0 0 4 0" />
+													<TextBlock
+														VerticalAlignment="Center"
+														Focusable="True"
+														Text="{Binding Path=DataItem.TriggerGroup.Name}">
+														<FrameworkElement.Style>
+															<Style
+																TargetType="{x:Type TextBlock}">
+																<Style.Triggers>
+																	<DataTrigger
+																		Value="True"
+																		Binding="{Binding Path=IsSelected}">
+																		<Setter
+																			Property="Foreground"
+																			Value="#FFFFFFFF" />
+																	</DataTrigger>
+																</Style.Triggers>
+															</Style>
+														</FrameworkElement.Style>
+													</TextBlock>
+												</StackPanel>
+											</DataTemplate>
+										</ItemsControl.ItemTemplate>
+									</shared:TreeList>
+								</Border>
+								<StackPanel
+									Orientation="Horizontal"
+									Grid.Row="4"
+									HorizontalAlignment="Right">
+									<Button
+										Content="OK"
+										Width="60"
+										Margin="0 0 10 0"
+										Command="{Binding Path=AddTriggerCommand, RelativeSource={RelativeSource TemplatedParent}}"
+										IsEnabled="{Binding Path=SelectedTriggerGroup, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterNullToBoolean}}" />
+									<Button
+										Content="Cancel"
+										Width="60"
+										Command="{Binding Path=CancelGroupSelectionCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+								</StackPanel>
+							</Grid>
+						</shared:DialogEditor>
+						<local:TriggerGroupEditor
+							Visibility="{Binding Path=ShowTriggerGroupEditor, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}"
+							ParentGroup="{Binding Path=SelectedTriggerGroup, RelativeSource={RelativeSource TemplatedParent}}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:ErrorReportControl}"
+		TargetType="{x:Type local:ErrorReportControl}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:ErrorReportControl}">
+					<Grid
+						VerticalAlignment="Stretch"
+						HorizontalAlignment="Stretch">
+						<shared:DialogOverlay
+							Title="Crash Detected"
+							BorderColor="#FF8B0000"
+							ContentHeight="160"
+							ContentWidth="350"
+							VerticalContentAlignment="Center">
+							<Grid
+								VerticalAlignment="Center">
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="15" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="15" />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<TextBlock
+									TextWrapping="Wrap"
+									Text="A crash log was detected.  Is it okay if the details are submitted to GimaSoft so that the error may be researched?  Only the stack trace will be submitted, no personal information."
+									Grid.Row="0" />
+								<TextBlock
+									Text="Comments regarding the crash (optional):"
+									Grid.Row="2" />
+								<TextBox
+									TextWrapping="Wrap"
+									Height="30"
+									Grid.Row="3"
+									Text="{Binding Path=ErrorData.Comments, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+								<Grid
+									Row="5">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition />
+										<ColumnDefinition />
+										<ColumnDefinition />
+									</Grid.ColumnDefinitions>
+									<Button
+										Content="Yes, Submit"
+										Width="80"
+										HorizontalAlignment="Left"
+										Grid.Column="0"
+										Command="{Binding Path=SendErrorCommand, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+									<Button
+										Content="View Details"
+										CommandParameter="true"
+										Width="80"
+										HorizontalAlignment="Center"
+										Grid.Column="1"
+										Command="{Binding Path=ShowDetailCommand, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+									<Button
+										Content="No"
+										Width="80"
+										HorizontalAlignment="Right"
+										Grid.Column="2"
+										Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+								</Grid>
+							</Grid>
+						</shared:DialogOverlay>
+						<shared:DialogOverlay
+							Title="Error Details"
+							DialogHorizontalAlignment="Stretch"
+							DialogVerticalAlignment="Stretch"
+							DialogMargin="30"
+							Visibility="{Binding Path=ShowErrorDetail, RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition />
+									<RowDefinition
+										Height="10" />
+									<RowDefinition
+										Height="Auto" />
+								</Grid.RowDefinitions>
+								<TextBox
+									IsReadOnly="True"
+									HorizontalAlignment="Stretch"
+									VerticalAlignment="Stretch"
+									HorizontalContentAlignment="Left"
+									VerticalContentAlignment="Top"
+									Grid.Row="0"
+									Text="{Binding Path=ErrorData.ErrorData, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+								<Button
+									Content="Close"
+									HorizontalAlignment="Right"
+									CommandParameter="false"
+									Grid.Row="2"
+									Command="{Binding Path=ShowDetailCommand, RelativeSource={RelativeSource Mode=TemplatedParent}}" />
+							</Grid>
+						</shared:DialogOverlay>
+						<shared:DialogOverlay
+							Title="Sending"
+							ContentWidth="200"
+							ContentHeight="100"
+							Visibility="{Binding Path=Status, ConverterParameter='{x:Static local:ErrorReportControl+Statuses.Uploading}', RelativeSource={RelativeSource Mode=TemplatedParent}, Converter={StaticResource ConverterEnumToVisibility}}">
+							<TextBlock
+								Text="Uploading Error Data..."
+								VerticalAlignment="Center"
+								HorizontalAlignment="Center" />
+						</shared:DialogOverlay>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style
+		x:Key="{x:Type local:TriggerSearchControl}"
+		TargetType="{x:Type local:TriggerSearchControl}">
+		<Setter
+			Property="Template">
+			<Setter.Value>
+				<ControlTemplate
+					TargetType="{x:Type local:TriggerSearchControl}">
+					<Grid
+						VerticalAlignment="Stretch"
+						HorizontalAlignment="Stretch">
+						<shared:DialogEditor
+							Title="Trigger Search"
+							DialogMargin="30"
+							DialogHorizontalAlignment="Stretch"
+							DialogVerticalAlignment="Stretch"
+							Visibility="{TemplateBinding UIElement.Visibility}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition
+										Height="Auto" />
+									<RowDefinition
+										Height="5" />
+									<RowDefinition />
+								</Grid.RowDefinitions>
+								<GroupBox
+									Grid.Row="0">
+									<HeaderedContentControl.Header>
+										<TextBlock
+											Text="Search Options"
+											FontWeight="Bold" />
+									</HeaderedContentControl.Header>
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+											<RowDefinition
+												Height="5" />
+											<RowDefinition
+												Height="Auto" />
+										</Grid.RowDefinitions>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition
+												Width="100" />
+											<ColumnDefinition />
+										</Grid.ColumnDefinitions>
+										<Label
+											Content="Search for: "
+											Grid.Row="0"
+											Grid.Column="0" />
+										<TextBox
+											HorizontalAlignment="Stretch"
+											Grid.Column="6"
+											Text="{Binding Path=SearchText, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+											IsEnabled="{Binding Path=SearchType, ConverterParameter='{x:Static biz:LogSearchTypes.Text}', RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterEnumToBoolean}}" />
+										<Label
+											Content="Modified Since:"
+											Grid.Row="2"
+											Grid.Column="0" />
+										<extToolkit:DateTimePicker
+											Format="Custom"
+											Width="180"
+											FormatString="MM/dd/yyyy hh:mm:ss tt"
+											HorizontalAlignment="Left"
+											Grid.Row="2"
+											Grid.Column="1"
+											Value="{Binding Path=ModifiedSince, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+										<StackPanel
+											Orientation="Horizontal"
+											HorizontalAlignment="Right"
+											Grid.Row="4"
+											Grid.Column="1">
+											<Button
+												Content="Search"
+												Width="80"
+												Command="{Binding Path=SearchCommand, RelativeSource={RelativeSource TemplatedParent}}"
+												IsEnabled="{Binding Path=SearchInProgress, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanNegate}}" />
+											<Button
+												Content="Close"
+												Margin="10 0"
+												Width="80"
+												Command="{Binding Path=CloseCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										</StackPanel>
+									</Grid>
+								</GroupBox>
+								<ListView
+									x:Name="SearchResults"
+									HorizontalAlignment="Stretch"
+									HorizontalContentAlignment="Left"
+									SelectionMode="Extended"
+									VerticalAlignment="Stretch"
+									ScrollViewer.CanContentScroll="True"
+									Grid.Row="2"
+									ItemsSource="{Binding Path=Matches, RelativeSource={RelativeSource TemplatedParent}}"
+									Tag="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TriggerSearchControl}}}">
+									<i:Interaction.Behaviors>
+										<shared:ListViewSizeColumnsBehavior
+											SizeList="142|0.98" />
+									</i:Interaction.Behaviors>
+									<i:Interaction.Triggers>
+										<i:EventTrigger
+											EventName="SelectionChanged">
+											<cmd:EventToCommand
+												PassEventArgsToCommand="True"
+												Command="{Binding Path=ResultSelectionChangedCommand, RelativeSource={RelativeSource TemplatedParent}}" />
+										</i:EventTrigger>
+									</i:Interaction.Triggers>
+									<FrameworkElement.Resources>
+										<ResourceDictionary>
+											<Style
+												x:Key="tbGrid"
+												TargetType="{x:Type TextBlock}">
+												<Setter
+													Property="FontSize"
+													Value="12" />
+											</Style>
+											<Style
+												x:Key="{x:Type GridViewColumnHeader}"
+												TargetType="{x:Type GridViewColumnHeader}">
+												<Setter
+													Property="HorizontalContentAlignment"
+													Value="Left" />
+											</Style>
+										</ResourceDictionary>
+									</FrameworkElement.Resources>
+									<ListView.View>
+										<GridView>
+											<GridViewColumn
+												Header="Modified">
+												<GridViewColumn.CellTemplate>
+													<DataTemplate>
+														<TextBlock
+															Style="{StaticResource tbGrid}"
+															Text="{Binding Path=Modified, ConverterParameter='{}{0:MM/dd/yyyy hh:mm:ss tt}', Converter={StaticResource ConverterStringFormat}}" />
+													</DataTemplate>
+												</GridViewColumn.CellTemplate>
+											</GridViewColumn>
+											<GridViewColumn
+												Header="Trigger">
+												<GridViewColumn.CellTemplate>
+													<DataTemplate>
+														<StackPanel
+															Orientation="Horizontal">
+															<Button
+																ToolTipService.ShowDuration="30000"
+																FontSize="12"
+																Style="{StaticResource LinkButtonStyle}"
+																Content="{Binding Path=Name}"
+																Command="{Binding Path=EditTriggerCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType={x:Type local:TriggerSearchControl}}}"
+																CommandParameter="{Binding}">
+																<FrameworkElement.ToolTip>
+																	<ToolTip
+																		Style="{StaticResource TriggerTooltip}"
+																		DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}" />
+																</FrameworkElement.ToolTip>
+															</Button>
+														</StackPanel>
+													</DataTemplate>
+												</GridViewColumn.CellTemplate>
+											</GridViewColumn>
+										</GridView>
+									</ListView.View>
+								</ListView>
+							</Grid>
+						</shared:DialogEditor>
+						<local:TriggerEditor
+							Visibility="{Binding Path=ShowTriggerEditor, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource ConverterBooleanToVisibility}}"
+							Trigger="{Binding Path=EditingTrigger, RelativeSource={RelativeSource TemplatedParent}}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+</ResourceDictionary>

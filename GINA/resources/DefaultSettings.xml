@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <Settings>
+    <EnableSound>True</EnableSound>
+    <MasterVolume>100</MasterVolume>
+    <EnableText>True</EnableText>
+    <EnableTimers>True</EnableTimers>
+    <DisplayMatches>True</DisplayMatches>
+    <MatchDisplayLimit>100</MatchDisplayLimit>
+    <ShareServiceUri>http://eq.gimasoft.com/GINAServices/Package.svc</ShareServiceUri>
+    <AllowSharedPackages>True</AllowSharedPackages>
+    <AcceptShareLevel>Anybody</AcceptShareLevel>
+    <AutoMergeShareLevel>Nobody</AutoMergeShareLevel>
+    <ShareWhiteList />
+  </Settings>
+  <BehaviorGroups>
+    <Behavior>
+      <Name>Default</Name>
+      <FontName>Arial</FontName>
+      <FontSize>40</FontSize>
+      <FontColor>#FFFF00</FontColor>
+      <ShadowColor>#000000</ShadowColor>
+      <ShadowDepth>5</ShadowDepth>
+      <WindowLayout>
+        <WINDOWPLACEMENT>
+          <length>44</length>
+          <flags>0</flags>
+          <showCmd>1</showCmd>
+          <minPosition>
+            <X>-1</X>
+            <Y>-1</Y>
+          </minPosition>
+          <maxPosition>
+            <X>-1</X>
+            <Y>-1</Y>
+          </maxPosition>
+          <normalPosition>
+            <Left>50</Left>
+            <Top>50</Top>
+            <Right>911</Right>
+            <Bottom>367</Bottom>
+          </normalPosition>
+        </WINDOWPLACEMENT>
+      </WindowLayout>
+    </Behavior>
+  </BehaviorGroups>
+  <TriggerGroups>
+    <TriggerGroup>
+      <Name>Common</Name>
+      <GroupId>1</GroupId>
+      <EnableByDefault>True</EnableByDefault>
+      <Behavior>Default</Behavior>
+      <Triggers>
+        <Trigger>
+          <Name>Invis Dropping</Name>
+          <TriggerText>You feel yourself starting to appear</TriggerText>
+          <EnableRegex>False</EnableRegex>
+          <UseText>False</UseText>
+          <DisplayText></DisplayText>
+          <UseTextToVoice>True</UseTextToVoice>
+          <InterruptSpeech>True</InterruptSpeech>
+          <TextToVoiceText>Invis dropping on {C}</TextToVoiceText>
+          <PlayMediaFile>False</PlayMediaFile>
+          <MediaFileName></MediaFileName>
+        </Trigger>
+      </Triggers>
+    </TriggerGroup>
+    <TriggerGroup>
+      <Name>Raids</Name>
+      <GroupId>2</GroupId>
+      <EnableByDefault>True</EnableByDefault>
+      <Behavior>Default</Behavior>
+      <TriggerGroups>
+      </TriggerGroups>
+    </TriggerGroup>
+    <TriggerGroup>
+      <Name>Class</Name>
+      <GroupId>3</GroupId>
+      <EnableByDefault>False</EnableByDefault>
+      <Behavior>Default</Behavior>
+      <TriggerGroups>
+      </TriggerGroups>
+    </TriggerGroup>
+  </TriggerGroups>
+  <Characters />
+</Configuration>

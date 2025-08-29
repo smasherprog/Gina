@@ -1,0 +1,82 @@
+<Application
+	x:Class="GimaSoft.GINA.App"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:local="clr-namespace:GimaSoft.GINA"
+	xmlns:biz="clr-namespace:GimaSoft.Business.GINA;assembly=GimaSoft.Business.GINA"
+	xmlns:shared="clr-namespace:WPFShared;assembly=WPFShared">
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary
+					Source="pack://application:,,,/SharedResources.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+			<local:MainWindowViewModel
+				x:Key="MainWindowVM" />
+			<Style
+				x:Key="{x:Type ToolTip}"
+				TargetType="{x:Type ToolTip}">
+				<Setter
+					Property="UIElement.SnapsToDevicePixels"
+					Value="True" />
+				<Setter
+					Property="Template">
+					<Setter.Value>
+						<ControlTemplate
+							TargetType="{x:Type ToolTip}">
+							<Border
+								BorderBrush="#888888"
+								BorderThickness="1"
+								SnapsToDevicePixels="True">
+								<Border
+									Width="Auto"
+									Height="Auto"
+									BorderBrush="#111111"
+									BorderThickness="1"
+									SnapsToDevicePixels="True"
+									CornerRadius="0"
+									Background="#C0D4EE"
+									Margin="0"
+									Padding="6 3">
+									<ContentPresenter
+										MaxWidth="250">
+										<FrameworkElement.Resources>
+											<ResourceDictionary>
+												<Style
+													x:Key="{x:Type TextBlock}"
+													TargetType="{x:Type TextBlock}">
+													<Setter
+														Property="TextWrapping"
+														Value="Wrap" />
+													<Setter
+														Property="Foreground"
+														Value="#222222" />
+													<Setter
+														Property="FontSize"
+														Value="12" />
+													<Setter
+														Property="Height"
+														Value="Auto" />
+												</Style>
+											</ResourceDictionary>
+										</FrameworkElement.Resources>
+									</ContentPresenter>
+								</Border>
+							</Border>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+			</Style>
+			<Style
+				x:Key="{x:Type DataGrid}"
+				TargetType="{x:Type DataGrid}">
+				<Setter
+					Property="DataGrid.HorizontalGridLinesBrush"
+					Value="#22000000" />
+				<Setter
+					Property="DataGrid.VerticalGridLinesBrush"
+					Value="#22000000" />
+			</Style>
+		</ResourceDictionary>
+	</Application.Resources>
+</Application>

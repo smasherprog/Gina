@@ -1,0 +1,2275 @@
+<r:RibbonWindow
+	x:Class="GimaSoft.GINA.MainWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:r="clr-namespace:Microsoft.Windows.Controls.Ribbon;assembly=RibbonControlsLibrary"
+	xmlns:extToolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit/extended"
+	xmlns:local="clr-namespace:GimaSoft.GINA"
+	xmlns:biz="clr-namespace:GimaSoft.Business.GINA;assembly=GimaSoft.Business.GINA"
+	xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+	xmlns:cmd="clr-namespace:GalaSoft.MvvmLight.Command;assembly=GalaSoft.MvvmLight.Extras.WPF4"
+	xmlns:sys="clr-namespace:System;assembly=mscorlib"
+	xmlns:shared="clr-namespace:WPFShared;assembly=WPFShared"
+	DataContext="{StaticResource MainWindowVM}"
+	Icon="pack://application:,,,/Resources/GinaLarge.ico"
+	MinHeight="640"
+	MinWidth="800"
+	Title="GINA"
+	Height="620"
+	Width="800"
+	Closing="Window_Closing"
+	Loaded="RibbonWindow_Loaded">
+	<FrameworkElement.Resources>
+		<ResourceDictionary>
+			<Style
+				x:Key="toolbarImageStyle"
+				TargetType="{x:Type Image}">
+				<Style.Triggers>
+					<DataTrigger
+						Value="False"
+						Binding="{Binding Path=IsEnabled, RelativeSource={RelativeSource AncestorLevel=1, AncestorType={x:Type Button}}}">
+						<Setter
+							Property="UIElement.Opacity"
+							Value="0.25" />
+					</DataTrigger>
+				</Style.Triggers>
+			</Style>
+			<local:CharacterAndCategoryConverter
+				x:Key="ConverterCharacterAndCategory" />
+			<local:CharacterConverterOverrideTextConverter
+				x:Key="ConverterCharacterCategoryOverrideText" />
+			<LinearGradientBrush
+				x:Key="brdActive"
+				StartPoint="0.5, 0"
+				EndPoint="0.5,1">
+				<GradientStop
+					Offset="0"
+					Color="PaleGreen" />
+				<GradientStop
+					Offset="0.25"
+					Color="DarkGreen" />
+				<GradientStop
+					Offset="0.75"
+					Color="DarkGreen" />
+				<GradientStop
+					Offset="1"
+					Color="PaleGreen" />
+			</LinearGradientBrush>
+			<LinearGradientBrush
+				x:Key="brdInactive"
+				StartPoint="0.5, 0"
+				EndPoint="0.5,1">
+				<GradientStop
+					Offset="0"
+					Color="#FF93A9BC" />
+				<GradientStop
+					Offset="0.2"
+					Color="Silver" />
+				<GradientStop
+					Offset="0.8"
+					Color="Silver" />
+				<GradientStop
+					Offset="1"
+					Color="#FF93A9BC" />
+			</LinearGradientBrush>
+			<Style
+				x:Key="characterStyle"
+				TargetType="{x:Type Border}">
+				<Style.Triggers>
+					<DataTrigger
+						Value="True"
+						Binding="{Binding Path=Character.IsEnabled}">
+						<Setter
+							Property="Background"
+							Value="{StaticResource brdActive}" />
+					</DataTrigger>
+					<DataTrigger
+						Value="False"
+						Binding="{Binding Path=Character.IsEnabled}">
+						<Setter
+							Property="Background"
+							Value="{StaticResource brdInactive}" />
+					</DataTrigger>
+					<DataTrigger
+						Value="True"
+						Binding="{Binding Path=IsSelected}">
+						<Setter
+							Property="BorderBrush"
+							Value="#FFFF0000" />
+						<Setter
+							Property="BorderThickness"
+							Value="2" />
+					</DataTrigger>
+					<MultiDataTrigger>
+						<MultiDataTrigger.Conditions>
+							<Condition
+								Value="False"
+								Binding="{Binding Path=IsSelected}" />
+							<Condition
+								Value="True"
+								Binding="{Binding Path=Character.IsEnabled}" />
+						</MultiDataTrigger.Conditions>
+						<Setter
+							Property="BorderBrush"
+							Value="#FF98FB98" />
+						<Setter
+							Property="BorderThickness"
+							Value="2" />
+					</MultiDataTrigger>
+					<MultiDataTrigger>
+						<MultiDataTrigger.Conditions>
+							<Condition
+								Value="False"
+								Binding="{Binding Path=IsSelected}" />
+							<Condition
+								Value="False"
+								Binding="{Binding Path=Character.IsEnabled}" />
+						</MultiDataTrigger.Conditions>
+						<Setter
+							Property="BorderBrush"
+							Value="#FFD3D3D3" />
+						<Setter
+							Property="BorderThickness"
+							Value="2" />
+					</MultiDataTrigger>
+				</Style.Triggers>
+			</Style>
+			<Style
+				x:Key="characterForeStyle"
+				TargetType="{x:Type TextBlock}">
+				<Style.Triggers>
+					<DataTrigger
+						Value="True"
+						Binding="{Binding Path=Character.IsEnabled}">
+						<Setter
+							Property="Foreground"
+							Value="#FFFFFFFF" />
+						<Setter
+							Property="FontWeight"
+							Value="Bold" />
+					</DataTrigger>
+					<DataTrigger
+						Value="False"
+						Binding="{Binding Path=Character.IsEnabled}">
+						<Setter
+							Property="Foreground"
+							Value="#FF000000" />
+						<Setter
+							Property="FontWeight"
+							Value="Bold" />
+					</DataTrigger>
+				</Style.Triggers>
+			</Style>
+		</ResourceDictionary>
+	</FrameworkElement.Resources>
+	<i:Interaction.Triggers>
+		<i:EventTrigger
+			EventName="Loaded">
+			<cmd:EventToCommand
+				CommandParameter="true"
+				Command="{Binding MainWindowLoadedCommand, Source='{StaticResource MainWindowVM}'}" />
+		</i:EventTrigger>
+	</i:Interaction.Triggers>
+	<Grid>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition
+					Height="Auto" />
+				<RowDefinition
+					Height="*"
+					MinHeight="120" />
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition
+					Width="*" />
+			</Grid.ColumnDefinitions>
+			<r:Ribbon
+				Name="MainRibbon"
+				Grid.Row="0"
+				Grid.Column="0">
+				<r:Ribbon.ApplicationMenu>
+					<r:RibbonApplicationMenu>
+						<r:RibbonApplicationMenuItem
+							Header="Settings"
+							Command="{Binding Path=EditPreferencesCommand}" />
+						<r:RibbonApplicationMenuItem
+							Header="Check for Updates"
+							Command="{Binding Path=CheckForUpdatesCommand}" />
+						<r:RibbonApplicationMenuItem
+							Header="About"
+							Command="{Binding Path=ToggleAboutDialogCommand}" />
+					</r:RibbonApplicationMenu>
+				</r:Ribbon.ApplicationMenu>
+				<r:RibbonTab
+					Header="Home">
+					<r:RibbonGroup
+						Header="Characters">
+						<r:RibbonButton
+							Label="Add"
+							LargeImageSource="pack://application:,,,/Resources/AddCharacter.png"
+							SmallImageSource="pack://application:,,,/Resources/AddCharacter.png"
+							r:RibbonControlService.ToolTipTitle="Add Character"
+							r:RibbonControlService.ToolTipDescription="Add a new character profile"
+							Command="{Binding Path=AddCharacterCommand}" />
+						<r:RibbonButton
+							Label="Edit"
+							SmallImageSource="pack://application:,,,/Resources/EditCharacter.png"
+							r:RibbonControlService.ToolTipTitle="Edit Character"
+							r:RibbonControlService.ToolTipDescription="Edit selected character"
+							Command="{Binding Path=EditCharacterCommand}"
+							IsEnabled="{Binding Path=SelectedCharacters.Count, Converter='{StaticResource ConverterInRangeToBoolean}', ConverterParameter=1|1}" />
+						<r:RibbonButton
+							Label="Remove"
+							SmallImageSource="pack://application:,,,/Resources/RemoveCharacter.png"
+							r:RibbonControlService.ToolTipTitle="Remove Characters"
+							r:RibbonControlService.ToolTipDescription="Remove selected character(s)"
+							Command="{Binding Path=ConfirmDeleteCharactersCommand}"
+							IsEnabled="{Binding Path=SelectedCharacters, Converter='{StaticResource ConverterEmptyCollectionToBoolean}'}" />
+					</r:RibbonGroup>
+					<r:RibbonGroup
+						Header="Trigger Groups">
+						<r:RibbonSplitButton
+							Label="Add"
+							LargeImageSource="pack://application:,,,/Resources/AddTriggerGroup.png"
+							SmallImageSource="pack://application:,,,/Resources/AddTriggerGroup.png"
+							CommandParameter="either"
+							r:RibbonControlService.ToolTipTitle="Add Trigger Group"
+							r:RibbonControlService.ToolTipDescription="Add a new trigger group"
+							Command="{Binding Path=AddTriggerGroupCommand}">
+							<ItemsControl.Items>
+								<r:RibbonMenuItem
+									Header="Add To Selected Group"
+									IsCheckable="False"
+									CommandParameter="selected"
+									IsEnabled="{Binding Path=SelectedTriggerGroup, Converter='{StaticResource ConverterNullToBoolean}'}"
+									Command="{Binding Path=AddTriggerGroupCommand}" />
+								<r:RibbonMenuItem
+									Header="Add Top Level Group"
+									IsCheckable="False"
+									CommandParameter="root"
+									Command="{Binding Path=AddTriggerGroupCommand}" />
+							</ItemsControl.Items>
+						</r:RibbonSplitButton>
+						<r:RibbonButton
+							Label="Edit"
+							SmallImageSource="pack://application:,,,/Resources/EditTriggerGroup.png"
+							r:RibbonControlService.ToolTipTitle="Edit Trigger Group"
+							r:RibbonControlService.ToolTipDescription="Edit selected trigger group"
+							Command="{Binding Path=EditTriggerGroupCommand}"
+							IsEnabled="{Binding Path=SelectedTriggerGroup, Converter='{StaticResource ConverterNullToBoolean}'}" />
+						<r:RibbonButton
+							Label="Delete"
+							SmallImageSource="pack://application:,,,/Resources/RemoveTriggerGroup.png"
+							r:RibbonControlService.ToolTipTitle="Delete Trigger Group"
+							r:RibbonControlService.ToolTipDescription="Permanently remove the selected trigger group, including any triggers or trigger groups that it contains"
+							Command="{Binding Path=ConfirmDeleteTriggerGroupCommand}"
+							IsEnabled="{Binding Path=SelectedTriggerGroup, Converter='{StaticResource ConverterNullToBoolean}'}" />
+					</r:RibbonGroup>
+					<r:RibbonGroup
+						Header="Triggers">
+						<r:RibbonButton
+							Label="Add"
+							LargeImageSource="pack://application:,,,/Resources/AddTrigger.png"
+							SmallImageSource="pack://application:,,,/Resources/AddTrigger.png"
+							r:RibbonControlService.ToolTipTitle="Add New Trigger"
+							r:RibbonControlService.ToolTipDescription="Add a new trigger to the selected trigger group"
+							Command="{Binding Path=AddTriggerCommand}"
+							IsEnabled="{Binding Path=SelectedTriggerGroup, Converter='{StaticResource ConverterNullToBoolean}'}" />
+						<r:RibbonButton
+							Label="Edit"
+							SmallImageSource="pack://application:,,,/Resources/EditTrigger.png"
+							r:RibbonControlService.ToolTipTitle="Edit Trigger"
+							r:RibbonControlService.ToolTipDescription="Edit the selected trigger"
+							Command="{Binding Path=EditTriggerCommand}"
+							IsEnabled="{Binding Path=SelectedTrigger, Converter='{StaticResource ConverterNullToBoolean}'}" />
+						<r:RibbonButton
+							Label="Delete"
+							SmallImageSource="pack://application:,,,/Resources/RemoveTrigger.png"
+							r:RibbonControlService.ToolTipTitle="Delete Trigger"
+							r:RibbonControlService.ToolTipDescription="Permanently remove the selected trigger"
+							Command="{Binding Path=ConfirmDeleteTriggerCommand}"
+							IsEnabled="{Binding Path=SelectedTrigger, Converter='{StaticResource ConverterNullToBoolean}'}" />
+					</r:RibbonGroup>
+					<r:RibbonGroup
+						Header="Misc">
+						<r:RibbonSplitButton
+							Label="Commands"
+							LargeImageSource="pack://application:,,,/Resources/Command.png"
+							SmallImageSource="pack://application:,,,/Resources/Command.png"
+							r:RibbonControlService.ToolTipTitle="Issue GINA commands"
+							r:RibbonControlService.ToolTipDescription="Issues a GINA command to all characters if the main menu item is clicked, or for a specific character if a character menu item is clicked.">
+							<ItemsControl.Items>
+								<r:RibbonSplitMenuItem
+									Header="Stop Alerts"
+									IsCheckable="False"
+									CommandParameter="stop"
+									ToolTipDescription="Removes text and timer notifications for all characters."
+									Command="{Binding Path=CharacterInstructionCommand}"
+									ItemsSource="{Binding Path=App.Data.Characters}">
+									<ItemsControl.ItemContainerStyle>
+										<Style
+											TargetType="{x:Type r:RibbonMenuItem}">
+											<Setter
+												Property="Header"
+												Value="{Binding Path=Character.DisplayName}" />
+											<Setter
+												Property="MenuItem.IsCheckable"
+												Value="False" />
+											<Setter
+												Property="MenuItem.Command"
+												Value="{Binding Path=CharacterInstructionCommand}" />
+											<Setter
+												Property="MenuItem.CommandParameter"
+												Value="stop" />
+											<Setter
+												Property="FrameworkElement.ToolTip"
+												Value="Removes text and timer notifications for this character.  The same can be accomplished in-game using:&#xA;&#xA;;tell YourOwnName {GINA:stop}" />
+										</Style>
+									</ItemsControl.ItemContainerStyle>
+								</r:RibbonSplitMenuItem>
+								<r:RibbonSplitMenuItem
+									Header="Reset Counters"
+									CommandParameter="resetcounters"
+									ToolTipDescription="Resets trigger counters for all characters."
+									Command="{Binding Path=CharacterInstructionCommand}"
+									ItemsSource="{Binding Path=App.Data.Characters}">
+									<ItemsControl.ItemContainerStyle>
+										<Style
+											TargetType="{x:Type r:RibbonMenuItem}">
+											<Setter
+												Property="Header"
+												Value="{Binding Path=Character.DisplayName}" />
+											<Setter
+												Property="MenuItem.IsCheckable"
+												Value="False" />
+											<Setter
+												Property="MenuItem.Command"
+												Value="{Binding Path=CharacterInstructionCommand}" />
+											<Setter
+												Property="MenuItem.CommandParameter"
+												Value="resetcounters" />
+											<Setter
+												Property="FrameworkElement.ToolTip"
+												Value="Resets trigger counters for this character.  The same can be accomplished in-game using:&#xA;&#xA;;tell YourOwnName {GINA:resetcounters}" />
+										</Style>
+									</ItemsControl.ItemContainerStyle>
+								</r:RibbonSplitMenuItem>
+							</ItemsControl.Items>
+						</r:RibbonSplitButton>
+						<r:RibbonButton
+							Label="Gnomish Articulator"
+							LargeImageSource="pack://application:,,,/Resources/PhoneticTransforms.png"
+							SmallImageSource="pack://application:,,,/Resources/PhoneticTransforms.png"
+							r:RibbonControlService.ToolTipTitle="Edit Phonetic Transformations"
+							r:RibbonControlService.ToolTipDescription="Edit voice pronounciation of specific words"
+							Command="{Binding Path=EditPhoneticDictionaryCommand}" />
+						<r:RibbonSplitButton
+							Label="Search"
+							LargeImageSource="pack://application:,,,/Resources/Search.png"
+							SmallImageSource="pack://application:,,,/Resources/Search.png"
+							r:RibbonControlService.ToolTipTitle="Search Log File Or Triggers"
+							r:RibbonControlService.ToolTipDescription="Search a character's log file to find specific text (regular expressions supported) or to see which triggers would be triggered, or search your trigger library to locate a trigger."
+							Command="{Binding Path=SearchLogCommand}">
+							<ItemsControl.Items>
+								<r:RibbonMenuItem
+									Header="Log File"
+									IsCheckable="False"
+									Command="{Binding Path=SearchLogCommand}" />
+								<r:RibbonMenuItem
+									Header="Triggers"
+									IsCheckable="False"
+									Command="{Binding Path=SearchTriggersCommand}" />
+							</ItemsControl.Items>
+						</r:RibbonSplitButton>
+					</r:RibbonGroup>
+				</r:RibbonTab>
+				<r:RibbonTab
+					Header="Sharing">
+					<r:RibbonGroup
+						Header="GimaLink"
+						IsEnabled="{Binding Path=Settings.AllowSharedPackages}">
+						<r:RibbonButton
+							Label="Gimagukk's Library"
+							LargeImageSource="pack://application:,,,/Resources/OpenRepository.png"
+							SmallImageSource="pack://application:,,,/Resources/OpenRepository.png"
+							r:RibbonControlService.ToolTipTitle="Gimagukk's Library"
+							r:RibbonControlService.ToolTipDescription="Allows you to view and download audio packages maintained on the Sharing server"
+							Command="{Binding Path=OpenRepositoryCommand}" />
+						<r:RibbonSplitButton
+							Label="Share"
+							LargeImageSource="pack://application:,,,/Resources/ShareTriggerGroup.png"
+							SmallImageSource="pack://application:,,,/Resources/ShareTriggerGroup.png"
+							CommandParameter="false"
+							r:RibbonControlService.ToolTipTitle="Share"
+							r:RibbonControlService.ToolTipDescription="Allows you to share the selected trigger or trigger group through the GimaLink server.  If a trigger group is selected, all sub-groups, triggers, and referenced media files will be included.  You can share this package with friends by sending them a tell with the Share Token you are given after uploading."
+							Command="{Binding Path=ShareCommand}"
+							IsEnabled="{Binding Path=SelectedIsExportable}">
+							<ItemsControl.Items>
+								<r:RibbonMenuItem
+									Header="Quick Share"
+									IsCheckable="False"
+									CommandParameter="false"
+									IsEnabled="{Binding Path=SelectedIsExportable, Converter='{StaticResource ConverterNullToBoolean}'}"
+									Command="{Binding Path=ShareCommand}" />
+								<r:RibbonMenuItem
+									Header="Submit to Library"
+									IsCheckable="False"
+									IsEnabled="False"
+									CommandParameter="true"
+									Command="{Binding Path=ShareCommand}" />
+							</ItemsControl.Items>
+						</r:RibbonSplitButton>
+					</r:RibbonGroup>
+					<r:RibbonGroup
+						Header="External Sources">
+						<r:RibbonSplitButton
+							Label="Import"
+							LargeImageSource="pack://application:,,,/Resources/GinaImport.png"
+							SmallImageSource="pack://application:,,,/Resources/GinaImport.png"
+							IsEnabled="True"
+							r:RibbonControlService.ToolTipTitle="Import"
+							r:RibbonControlService.ToolTipDescription="Import triggers from a GINA Package File, Everquest in-game audio triggers, or a GamTextTriggers file.">
+							<ItemsControl.Items>
+								<r:RibbonMenuItem
+									Header="From GINA Package File"
+									IsCheckable="False"
+									ToolTip="Import triggers and sound files from a file which has been exported from GINA."
+									Command="{Binding Path=ImportPackageCommand}" />
+								<r:RibbonMenuItem
+									Header="From Everquest"
+									IsCheckable="False"
+									ToolTip="Import audio triggers and sound files which have been created in-game in Everquest."
+									Command="{Binding Path=ImportEverquestTriggersCommand}" />
+								<r:RibbonMenuItem
+									Header="From GamTextTriggers File"
+									IsCheckable="False"
+									CommandParameter="export"
+									ToolTip="Import triggers from a file which has been created by exporting from GamTextTriggers.  Sound files are not included in *.gtt files, so any sound files referenced by the triggers will need to be manually updated after importing."
+									Command="{Binding Path=ImportGamTextTriggersCommand}" />
+								<r:RibbonMenuItem
+									Header="From GamTextTriggers Configuration"
+									IsCheckable="False"
+									CommandParameter="config"
+									ToolTip="Import trigger data and sound files from an existing GamTextTriggers installation."
+									Command="{Binding Path=ImportGamTextTriggersCommand}" />
+							</ItemsControl.Items>
+						</r:RibbonSplitButton>
+						<r:RibbonSplitButton
+							Label="Export"
+							LargeImageSource="pack://application:,,,/Resources/GinaExport.png"
+							SmallImageSource="pack://application:,,,/Resources/GinaExport.png"
+							r:RibbonControlService.ToolTipTitle="Import"
+							r:RibbonControlService.ToolTipDescription="Export the selected trigger or trigger group to selected destination.  If a trigger group is selected, all sub-groups, triggers, and referenced media files will be included."
+							IsEnabled="{Binding Path=SelectedIsExportable}">
+							<ItemsControl.Items>
+								<r:RibbonMenuItem
+									Header="To GINA Package File"
+									IsCheckable="False"
+									IsEnabled="{Binding Path=SelectedIsExportable}"
+									Command="{Binding Path=CreatePackageCommand}" />
+								<r:RibbonMenuItem
+									Header="To Everquest"
+									IsCheckable="False"
+									IsEnabled="{Binding Path=SelectedIsExportable}"
+									Command="{Binding Path=ExportEverquestTriggersCommand}" />
+								<r:RibbonMenuItem
+									Header="To GamTextTriggers File"
+									IsCheckable="False"
+									IsEnabled="{Binding Path=SelectedIsExportable}"
+									Command="{Binding Path=ExportGamTextTriggersCommand}" />
+							</ItemsControl.Items>
+						</r:RibbonSplitButton>
+					</r:RibbonGroup>
+				</r:RibbonTab>
+				<r:RibbonTab
+					Header="Overlays">
+					<r:RibbonGroup
+						Header="Text Overlays">
+						<r:RibbonButton
+							Label="Add"
+							LargeImageSource="pack://application:,,,/Resources/AddOverlay.png"
+							SmallImageSource="pack://application:,,,/Resources/AddOverlay.png"
+							r:RibbonControlService.ToolTipTitle="Add new text overlay window"
+							r:RibbonControlService.ToolTipDescription="Adds a new text overlay window to which text triggers can be directed"
+							Command="{Binding Path=AddBehaviorGroupCommand}" />
+						<r:RibbonControlGroup
+							ItemsSource="{Binding Path=App.Data.TextBehaviorGroups}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<r:RibbonSplitButton
+										LargeImageSource="pack://application:,,,/Resources/Overlay.png"
+										SmallImageSource="pack://application:,,,/Resources/Overlay.png"
+										Label="{Binding Path=Name}"
+										Command="{Binding Path=ToggleEditBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+										CommandParameter="{Binding}">
+										<ItemsControl.Items>
+											<r:RibbonMenuItem
+												Header="Properties"
+												IsCheckable="False"
+												Command="{Binding Path=ToggleEditBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+												CommandParameter="{Binding}" />
+											<r:RibbonMenuItem
+												Header="Save Layout"
+												IsCheckable="False"
+												Command="{Binding Path=SaveBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+												CommandParameter="{Binding}" />
+											<r:RibbonMenuItem
+												Header="Delete"
+												IsCheckable="False"
+												Command="{Binding Path=RemoveBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+												CommandParameter="{Binding}" />
+										</ItemsControl.Items>
+									</r:RibbonSplitButton>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</r:RibbonControlGroup>
+					</r:RibbonGroup>
+					<r:RibbonGroup
+						Header="Timer Overlays">
+						<r:RibbonButton
+							Label="Add"
+							LargeImageSource="pack://application:,,,/Resources/AddTimerOverlay.png"
+							SmallImageSource="pack://application:,,,/Resources/AddTimerOverlay.png"
+							CommandParameter="timer"
+							r:RibbonControlService.ToolTipTitle="Add new timer overlay window"
+							r:RibbonControlService.ToolTipDescription="Adds a new text timer window to which trigger timers can be directed"
+							Command="{Binding Path=AddBehaviorGroupCommand}" />
+						<r:RibbonControlGroup
+							ItemsSource="{Binding Path=App.Data.TimerBehaviorGroups}">
+							<ItemsControl.ItemTemplate>
+								<DataTemplate>
+									<r:RibbonSplitButton
+										LargeImageSource="pack://application:,,,/Resources/TimerOverlay.png"
+										SmallImageSource="pack://application:,,,/Resources/TimerOverlay.png"
+										Label="{Binding Path=Name}"
+										Command="{Binding Path=ToggleEditBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+										CommandParameter="{Binding}">
+										<ItemsControl.Items>
+											<r:RibbonMenuItem
+												Header="Properties"
+												IsCheckable="False"
+												Command="{Binding Path=ToggleEditBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+												CommandParameter="{Binding}" />
+											<r:RibbonMenuItem
+												Header="Save Layout"
+												IsCheckable="False"
+												Command="{Binding Path=SaveBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+												CommandParameter="{Binding}" />
+											<r:RibbonMenuItem
+												Header="Delete"
+												IsCheckable="False"
+												Command="{Binding Path=RemoveBehaviorGroupCommand, Source='{StaticResource MainWindowVM}'}"
+												CommandParameter="{Binding}" />
+										</ItemsControl.Items>
+									</r:RibbonSplitButton>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</r:RibbonControlGroup>
+					</r:RibbonGroup>
+				</r:RibbonTab>
+				<r:RibbonTab
+					Header="Categories">
+					<r:RibbonGroup
+						Header="Actions">
+						<r:RibbonButton
+							Label="Add"
+							LargeImageSource="pack://application:,,,/Resources/AddCategory.png"
+							SmallImageSource="pack://application:,,,/Resources/AddCategory.png"
+							r:RibbonControlService.ToolTipTitle="Create New Category"
+							r:RibbonControlService.ToolTipDescription="Creates a new category with default overlay and color settings."
+							Command="{Binding Path=AddTriggerCategoryCommand}" />
+						<r:RibbonButton
+							Label="Remove"
+							LargeImageSource="pack://application:,,,/Resources/RemoveCategory.png"
+							SmallImageSource="pack://application:,,,/Resources/RemoveCategory.png"
+							r:RibbonControlService.ToolTipTitle="Remove Selected Category"
+							r:RibbonControlService.ToolTipDescription="Removes the selected category.  Any triggers using the removed category will be modified to use the default category."
+							Command="{Binding Path=ConfirmDeleteTriggerCategoryCommand}" />
+						<r:RibbonButton
+							Label="Set As Default"
+							LargeImageSource="pack://application:,,,/Resources/DefaultCategory.png"
+							SmallImageSource="pack://application:,,,/Resources/DefaultCategory.png"
+							r:RibbonControlService.ToolTipTitle="Set As Default"
+							r:RibbonControlService.ToolTipDescription="Sets the selected category to be the default category for new triggers."
+							Command="{Binding Path=SetTriggerCategoryAsDefaultCommand}" />
+					</r:RibbonGroup>
+				</r:RibbonTab>
+				<r:RibbonTab
+					Header="Performance">
+					<r:RibbonGroup
+						Header="Profiler">
+						<r:RibbonButton
+							Label="Start"
+							LargeImageSource="pack://application:,,,/Resources/Play32.png"
+							r:RibbonControlService.ToolTipTitle="Start Profiler"
+							r:RibbonControlService.ToolTipDescription="Starts the profiler to capture trigger evaluation statistics"
+							Command="{Binding Path=StartProfilerCommand}"
+							IsEnabled="{Binding Path=ProfilerRunning, Converter='{StaticResource ConverterBooleanNegate}'}" />
+						<r:RibbonButton
+							Label="Pause"
+							LargeImageSource="pack://application:,,,/Resources/Pause32.png"
+							r:RibbonControlService.ToolTipTitle="Pause Profiler"
+							r:RibbonControlService.ToolTipDescription="Pauses the screen refresh but still collects trigger statistics"
+							Command="{Binding Path=PauseProfilerCommand}"
+							IsEnabled="{Binding Path=ProfilerRunning}" />
+						<r:RibbonButton
+							Label="Stop"
+							LargeImageSource="pack://application:,,,/Resources/Stop32.png"
+							r:RibbonControlService.ToolTipTitle="Stop Profiler"
+							r:RibbonControlService.ToolTipDescription="Stops the profiler"
+							Command="{Binding Path=StopProfilerCommand}"
+							IsEnabled="{Binding Path=Settings.EnableProfiler}" />
+						<r:RibbonButton
+							Label="Refresh"
+							LargeImageSource="pack://application:,,,/Resources/Refresh32.png"
+							r:RibbonControlService.ToolTipTitle="Refresh grid data"
+							r:RibbonControlService.ToolTipDescription="Refreshes the profiler grid data immediately"
+							Command="{Binding Path=RefreshProfilerCommand}"
+							IsEnabled="{Binding Path=Settings.EnableProfiler}" />
+						<r:RibbonComboBox
+							Label="Refresh Interval">
+							<r:RibbonGallery
+								SelectedValuePath="Item2"
+								MaxColumnCount="1"
+								SelectedValue="{Binding Path=Settings.ProfilerRefreshInterval}">
+								<r:RibbonGalleryCategory
+									DisplayMemberPath="Item1"
+									ItemsSource="{Binding Path=RefreshIntervals}" />
+							</r:RibbonGallery>
+						</r:RibbonComboBox>
+						<r:RibbonButton
+							Label="Reset Statistics"
+							SmallImageSource="pack://application:,,,/Resources/Reset16.png"
+							r:RibbonControlService.ToolTipTitle="Reset profiler statistics"
+							r:RibbonControlService.ToolTipDescription="Clears profiler statistics on all triggers"
+							Command="{Binding Path=ResetProfilerCountersCommand}"
+							IsEnabled="{Binding Path=Settings.EnableProfiler}" />
+					</r:RibbonGroup>
+					<r:RibbonGroup
+						Header="Enabled Processors"
+						ItemsSource="{Binding Path=AvailableProcessors}">
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<r:RibbonCheckBox
+									IsChecked="{Binding Path=IsSelected}"
+									Label="{Binding Path=ProcessorName}" />
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+					</r:RibbonGroup>
+				</r:RibbonTab>
+			</r:Ribbon>
+			<Grid
+				Row="1"
+				Visibility="{Binding Path=SelectedIndex, ElementName=MainRibbon, Converter='{StaticResource ConverterInListToVisibility}', ConverterParameter=4}">
+				<Grid.RowDefinitions>
+					<RowDefinition
+						Height="Auto" />
+					<RowDefinition
+						Height="2*" />
+				</Grid.RowDefinitions>
+				<StackPanel
+					Orientation="Horizontal"
+					Grid.Row="0"
+					Visibility="{Binding Path=Settings.EnableProfiler, Converter='{StaticResource ConverterBooleanToVisibility}'}">
+					<Label
+						Content="Lines Per Second: " />
+					<Label
+						Content="{Binding Path=LinesPerSecond, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+					<Label
+						Content="Memory: "
+						Margin="20 0 0 0" />
+					<Label
+						Content="{Binding Path=MemoryUsed, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+				</StackPanel>
+				<DataGrid
+					Name="ProfilerGrid"
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Left"
+					IsReadOnly="True"
+					ClipboardCopyMode="IncludeHeader"
+					SelectionUnit="FullRow"
+					SelectionMode="Single"
+					AutoGenerateColumns="False"
+					VerticalAlignment="Stretch"
+					CanUserSortColumns="True"
+					CanUserResizeColumns="True"
+					CanUserReorderColumns="True"
+					ScrollViewer.CanContentScroll="True"
+					HeadersVisibility="Column"
+					HorizontalGridLinesBrush="#22000000"
+					VerticalGridLinesBrush="#22000000"
+					EnableRowVirtualization="True"
+					FrozenColumnCount="1"
+					Grid.Row="1"
+					ItemsSource="{Binding Path=ProfilerTriggers}"
+					Visibility="{Binding Path=Settings.EnableProfiler, Converter='{StaticResource ConverterBooleanToVisibility}'}">
+					<FrameworkElement.Resources>
+						<ResourceDictionary>
+							<SolidColorBrush
+								x:Key="SummaryColor"
+								Color="#88FFFF88" />
+							<Style
+								x:Key="tbGrid"
+								TargetType="{x:Type TextBlock}">
+								<Setter
+									Property="FontSize"
+									Value="12" />
+								<Setter
+									Property="TextBlock.TextAlignment"
+									Value="Right" />
+							</Style>
+							<Style
+								x:Key="tbGridSummary"
+								TargetType="{x:Type TextBlock}"
+								BasedOn="{StaticResource tbGrid}">
+								<Setter
+									Property="Background"
+									Value="{StaticResource SummaryColor}" />
+							</Style>
+							<Style
+								x:Key="tbGridHeader"
+								TargetType="{x:Type TextBlock}">
+								<Setter
+									Property="FontSize"
+									Value="12" />
+								<Setter
+									Property="TextBlock.TextAlignment"
+									Value="Center" />
+							</Style>
+						</ResourceDictionary>
+					</FrameworkElement.Resources>
+					<DataGrid.Columns>
+						<DataGridTemplateColumn
+							Header="Trigger"
+							SortMemberPath="Name"
+							Width="100">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button
+										Style="{StaticResource LinkButtonStyle}"
+										FontSize="12"
+										ToolTipService.ShowDuration="30000"
+										Content="{Binding Path=Name}"
+										Command="{Binding Path=EditTriggerCommand, Source='{StaticResource MainWindowVM}'}"
+										CommandParameter="{Binding}">
+										<FrameworkElement.ToolTip>
+											<ToolTip
+												Style="{StaticResource TriggerTooltip}"
+												DataContext="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}" />
+										</FrameworkElement.ToolTip>
+									</Button>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="TotalMatchComparisons">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Total number of lines of text which have been evaluated against this trigger">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Combined</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Comparisons</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=TotalMatchComparisons, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="TotalMatchCost">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Microseconds which have been spent evaluating this trigger for all lines of text">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Combined</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Total µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=TotalMatchCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="AverageMatchCost"
+							SortDirection="Descending">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Average microseconds spent when evaluating this trigger for a single line of text">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Combined</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Average µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGridSummary}"
+										Text="{Binding Path=AverageMatchCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0.00}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="FailureMatchComparisons">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Number of lines of text evaluated which have not matched this trigger">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Unmatched</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Comparisons</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=FailureMatchComparisons, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="FailureMatchCost">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Microseconds which have been spent evaluating this trigger for all lines of text which did not result in a match">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Unmatched</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Total µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=FailureMatchCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="AverageFailureMatchCost">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Average microseconds spent when evaluating this trigger for a single line of text which does not result in a match">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Unmatched</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Average µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGridSummary}"
+										Text="{Binding Path=AverageFailureMatchCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0.00}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="SuccessMatchComparisons">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Number of lines of text evaluated which have matched this trigger">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Matched</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Comparisons</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=SuccessMatchComparisons, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="SuccessMatchCost">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Microseconds which have been spent evaluating this trigger for all lines of text which resulted in a match">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Matched</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Total µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=SuccessMatchCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="AverageSuccessMatchCost">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Average microseconds spent when evaluating this trigger for a single line of text which results in a match">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Matched</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Average µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGridSummary}"
+										Text="{Binding Path=AverageSuccessMatchCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0.00}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="EarlyEndComparisons">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Number of lines of text evaluated to determine if a timer for this trigger should be ended early">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Early End</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Comparisons</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=EarlyEndComparisons, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="EarlyEndCost">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Microseconds which have been spent evaluating lines to determine if a timer for this trigger should be ended early">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Early End</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Total µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=EarlyEndCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							SortMemberPath="AverageSuccessMatchCost">
+							<DataGridColumn.Header>
+								<StackPanel
+									Orientation="Vertical"
+									ToolTip="Average microseconds spent when evaluating a single line to determine if a timer for this trigger should be ended early">
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Early End</TextBlock>
+									<TextBlock
+										Style="{StaticResource tbGridHeader}">Average µs</TextBlock>
+								</StackPanel>
+							</DataGridColumn.Header>
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGridSummary}"
+										Text="{Binding Path=AverageEarlyEndCost, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:#,0.00}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+			</Grid>
+			<Grid
+				Row="1"
+				Visibility="{Binding Path=SelectedIndex, ElementName=MainRibbon, Converter='{StaticResource ConverterInListToVisibility}', ConverterParameter=3}">
+				<ScrollViewer
+					HorizontalScrollBarVisibility="Auto"
+					VerticalScrollBarVisibility="Auto"
+					Background="#FFF1F5FB">
+					<TabControl
+						TabStripPlacement="Left"
+						HorizontalContentAlignment="Left"
+						Background="#FFF1F5FB"
+						SelectedItem="{Binding Path=SelectedTriggerCategory, Mode=TwoWay}"
+						ItemsSource="{Binding Path=App.Data.TriggerCategories}">
+						<ItemsControl.ItemContainerStyle>
+							<Style
+								TargetType="{x:Type TabItem}">
+								<Setter
+									Property="HorizontalAlignment"
+									Value="Stretch" />
+								<Setter
+									Property="HorizontalContentAlignment"
+									Value="Stretch" />
+							</Style>
+						</ItemsControl.ItemContainerStyle>
+						<ItemsControl.ItemTemplate>
+							<DataTemplate>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition
+											Width="20" />
+										<ColumnDefinition />
+									</Grid.ColumnDefinitions>
+									<Image
+										Source="pack://application:,,,/Resources/Default.png"
+										Width="13"
+										Height="13"
+										ToolTip="This is the default category"
+										Visibility="{Binding Path=IsDefault, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+									<TextBlock
+										HorizontalAlignment="Left"
+										Grid.Column="1"
+										Text="{Binding Path=Name}" />
+								</Grid>
+							</DataTemplate>
+						</ItemsControl.ItemTemplate>
+						<TabControl.ContentTemplate>
+							<DataTemplate>
+								<StackPanel
+									Margin="20 0 20 0">
+									<FrameworkElement.Resources>
+										<ResourceDictionary>
+											<ResourceDictionary.MergedDictionaries>
+												<ResourceDictionary
+													Source="/WPFShared;component/Styles/EditorStyles.xaml" />
+											</ResourceDictionary.MergedDictionaries>
+											<Style
+												x:Key="{x:Type Label}"
+												TargetType="{x:Type Label}">
+												<Setter
+													Property="Margin"
+													Value="0" />
+												<Setter
+													Property="Padding"
+													Value="0" />
+												<Setter
+													Property="VerticalAlignment"
+													Value="Bottom" />
+												<Setter
+													Property="VerticalContentAlignment"
+													Value="Bottom" />
+											</Style>
+											<Style
+												x:Key="{x:Type RadioButton}"
+												TargetType="{x:Type RadioButton}">
+												<Setter
+													Property="Padding"
+													Value="0" />
+												<Setter
+													Property="VerticalAlignment"
+													Value="Bottom" />
+												<Setter
+													Property="VerticalContentAlignment"
+													Value="Bottom" />
+											</Style>
+											<Style
+												x:Key="{x:Type StackPanel}"
+												TargetType="{x:Type StackPanel}">
+												<Setter
+													Property="Margin"
+													Value="0" />
+											</Style>
+											<shared:UniqueNameGenerator
+												x:Key="RadioCatTextStyle" />
+											<shared:UniqueNameGenerator
+												x:Key="RadioCatTimerStyle" />
+										</ResourceDictionary>
+									</FrameworkElement.Resources>
+									<GroupBox>
+										<HeaderedContentControl.Header>
+											<TextBlock
+												Text="Category Settings"
+												FontWeight="Bold" />
+										</HeaderedContentControl.Header>
+										<FrameworkElement.Resources>
+											<ResourceDictionary>
+												<sys:Double
+													x:Key="Col1Width">60</sys:Double>
+												<sys:Double
+													x:Key="Col2Width">60</sys:Double>
+												<sys:Double
+													x:Key="Col3Spacer">120</sys:Double>
+											</ResourceDictionary>
+										</FrameworkElement.Resources>
+										<StackPanel
+											Orientation="Vertical">
+											<Border
+												BorderThickness="0 0 0 1"
+												BorderBrush="#FF808080"
+												Margin="-10 0 -10 5"
+												Padding="10 0 10 5">
+												<StackPanel
+													Orientation="Horizontal"
+													HorizontalAlignment="Stretch">
+													<Label
+														Content="Name"
+														Width="{StaticResource Col1Width}" />
+													<TextBox
+														Width="300"
+														Text="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+												</StackPanel>
+											</Border>
+											<Border
+												BorderThickness="0 0 0 1"
+												BorderBrush="#FF808080"
+												Margin="-10 0 -10 5"
+												Padding="10 0 10 5">
+												<StackPanel
+													Orientation="Vertical">
+													<StackPanel
+														Orientation="Horizontal">
+														<Label
+															Content="Text"
+															Width="{StaticResource Col1Width}" />
+														<Label
+															Content="Overlay"
+															Width="{StaticResource Col2Width}" />
+														<ComboBox
+															DisplayMemberPath="Name"
+															Margin="0"
+															HorizontalAlignment="Left"
+															ItemsSource="{Binding Path=App.Data.TextBehaviorGroups, Source='{StaticResource MainWindowVM}'}"
+															SelectedValue="{Binding Path=TextOverlay, Mode=TwoWay}" />
+													</StackPanel>
+													<StackPanel
+														Orientation="Horizontal"
+														Margin="0 5 0 0">
+														<Label
+															Content=""
+															Width="{StaticResource Col1Width}" />
+														<Label
+															Content="Colors"
+															Width="{StaticResource Col2Width}" />
+														<RadioButton
+															Padding="0"
+															Content="Use character colors"
+															IsChecked="{Binding Path=TextStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCharacter}'}"
+															GroupName="{Binding Path=Name, Source='{StaticResource RadioCatTextStyle}'}" />
+													</StackPanel>
+													<StackPanel
+														Orientation="Horizontal">
+														<Label
+															Content=""
+															Width="{StaticResource Col3Spacer}" />
+														<RadioButton
+															Content="Use these colors:"
+															IsChecked="{Binding Path=TextStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+															GroupName="{Binding Path=Name, Source='{StaticResource RadioCatTextStyle}'}" />
+														<Label
+															Content="Font: "
+															Margin="20 0 0 0" />
+														<extToolkit:ColorPicker
+															ShowAvailableColors="False"
+															ShowRecentColors="True"
+															Width="60"
+															IsEnabled="{Binding Path=TextStyleSource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+															SelectedColor="{Binding Path=TextStyle.FontColor.Color, Mode=TwoWay}" />
+													</StackPanel>
+												</StackPanel>
+											</Border>
+											<StackPanel
+												Orientation="Vertical">
+												<StackPanel
+													Orientation="Horizontal">
+													<Label
+														Content="Timers"
+														Width="{StaticResource Col1Width}" />
+													<Label
+														Content="Overlay"
+														Width="{StaticResource Col2Width}" />
+													<ComboBox
+														DisplayMemberPath="Name"
+														HorizontalAlignment="Left"
+														ItemsSource="{Binding Path=App.Data.TimerBehaviorGroups, Source='{StaticResource MainWindowVM}'}"
+														SelectedValue="{Binding Path=TimerOverlay, Mode=TwoWay}" />
+												</StackPanel>
+												<StackPanel
+													Orientation="Horizontal"
+													Margin="0 5 0 0">
+													<Label
+														Content=""
+														Width="{StaticResource Col1Width}" />
+													<Label
+														Content="Colors"
+														Width="{StaticResource Col2Width}" />
+													<RadioButton
+														Content="Use character colors"
+														IsChecked="{Binding Path=TimerStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCharacter}'}"
+														GroupName="{Binding Path=Name, Source='{StaticResource RadioCatTimerStyle}'}" />
+												</StackPanel>
+												<StackPanel
+													Orientation="Horizontal">
+													<Label
+														Content=""
+														Width="{StaticResource Col3Spacer}" />
+													<RadioButton
+														Content="Use these colors:"
+														IsChecked="{Binding Path=TimerStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+														GroupName="{Binding Path=Name, Source='{StaticResource RadioCatTimerStyle}'}" />
+													<Label
+														Content="Font: "
+														Margin="20 0 0 0" />
+													<extToolkit:ColorPicker
+														ShowAvailableColors="False"
+														ShowRecentColors="True"
+														Width="60"
+														IsEnabled="{Binding Path=TimerStyleSource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+														SelectedColor="{Binding Path=TimerStyle.FontColor.Color, Mode=TwoWay}" />
+													<Label
+														Content="Timer Bar: "
+														Margin="20 0 0 0" />
+													<extToolkit:ColorPicker
+														ShowAvailableColors="False"
+														ShowRecentColors="True"
+														Width="60"
+														IsEnabled="{Binding Path=TimerStyleSource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+														SelectedColor="{Binding Path=TimerStyle.TimerBarColor, Mode=TwoWay}" />
+												</StackPanel>
+											</StackPanel>
+										</StackPanel>
+									</GroupBox>
+									<GroupBox
+										HorizontalAlignment="Stretch"
+										HorizontalContentAlignment="Stretch"
+										Margin="0 10 0 0">
+										<HeaderedContentControl.Header>
+											<TextBlock
+												Text="Character Overrides"
+												FontWeight="Bold" />
+										</HeaderedContentControl.Header>
+										<ListView
+											HorizontalAlignment="Stretch"
+											HorizontalContentAlignment="Stretch"
+											ItemsSource="{Binding Path=App.Data.Characters, Source='{StaticResource MainWindowVM}'}">
+											<ItemsControl.ItemContainerStyle>
+												<Style
+													TargetType="{x:Type ListViewItem}">
+													<Setter
+														Property="Padding"
+														Value="0 0 0 0" />
+													<Setter
+														Property="Margin"
+														Value="0 0 0 0" />
+												</Style>
+											</ItemsControl.ItemContainerStyle>
+											<ItemsControl.ItemTemplate>
+												<DataTemplate
+													DataType="{x:Type biz:GINACharacter}">
+													<FrameworkTemplate.Resources>
+														<ResourceDictionary>
+															<sys:Double
+																x:Key="Col1Width">60</sys:Double>
+															<Style
+																x:Key="CharacterCategoryStyle"
+																TargetType="{x:Type Expander}">
+																<Style.Triggers>
+																	<DataTrigger
+																		Value="True"
+																		Binding="{Binding Path=Character.IsEnabled}">
+																		<Setter
+																			Property="Background"
+																			Value="#889ACD32" />
+																	</DataTrigger>
+																	<DataTrigger
+																		Value="False"
+																		Binding="{Binding Path=Character.IsEnabled}">
+																		<Setter
+																			Property="Background"
+																			Value="#AADCDCDC" />
+																	</DataTrigger>
+																</Style.Triggers>
+															</Style>
+														</ResourceDictionary>
+													</FrameworkTemplate.Resources>
+													<Expander
+														HorizontalAlignment="Stretch"
+														Margin="0 0 0 0"
+														BorderThickness="0"
+														Style="{StaticResource CharacterCategoryStyle}">
+														<HeaderedContentControl.Header>
+															<Grid>
+																<Grid.ColumnDefinitions>
+																	<ColumnDefinition
+																		Width="150" />
+																	<ColumnDefinition />
+																</Grid.ColumnDefinitions>
+																<TextBlock
+																	VerticalAlignment="Bottom"
+																	Grid.Column="0"
+																	Text="{Binding Path=Character.DisplayName}" />
+																<TextBlock
+																	VerticalAlignment="Bottom"
+																	TextWrapping="Wrap"
+																	Margin="30 0 0 0"
+																	Grid.Column="2">
+																	<FrameworkElement.DataContext>
+																		<MultiBinding
+																			Converter="{StaticResource ConverterCharacterAndCategory}">
+																			<Binding
+																				Path="Character" />
+																			<Binding
+																				Path="DataContext"
+																				RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}" />
+																		</MultiBinding>
+																	</FrameworkElement.DataContext>
+																	<TextBlock.Text>
+																		<MultiBinding
+																			Converter="{StaticResource ConverterCharacterCategoryOverrideText}">
+																			<Binding
+																				Path="DataContext.Character"
+																				RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type Grid}}" />
+																			<Binding
+																				Path="DataContext"
+																				RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}" />
+																			<Binding
+																				Path="TextOverlaySource" />
+																			<Binding
+																				Path="TextStyleSource" />
+																			<Binding
+																				Path="TimerOverlaySource" />
+																			<Binding
+																				Path="TimerStyleSource" />
+																		</MultiBinding>
+																	</TextBlock.Text>
+																</TextBlock>
+															</Grid>
+														</HeaderedContentControl.Header>
+														<StackPanel
+															Orientation="Vertical">
+															<FrameworkElement.Resources>
+																<ResourceDictionary>
+																	<shared:UniqueNameGenerator
+																		x:Key="RadioTextOverlay" />
+																	<shared:UniqueNameGenerator
+																		x:Key="RadioTextStyle" />
+																	<shared:UniqueNameGenerator
+																		x:Key="RadioTimerOverlay" />
+																	<shared:UniqueNameGenerator
+																		x:Key="RadioTimerStyle" />
+																</ResourceDictionary>
+															</FrameworkElement.Resources>
+															<FrameworkElement.DataContext>
+																<MultiBinding
+																	Converter="{StaticResource ConverterCharacterAndCategory}">
+																	<Binding
+																		Path="Character" />
+																	<Binding
+																		Path="DataContext"
+																		RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ListView}}" />
+																</MultiBinding>
+															</FrameworkElement.DataContext>
+															<Expander
+																Header="Text Overrides"
+																Background="#FFF5F5F5"
+																Margin="20 5 20 2">
+																<StackPanel
+																	Margin="5"
+																	Orientation="Vertical">
+																	<Border
+																		BorderBrush="#FFD3D3D3"
+																		BorderThickness="0 1 0 1"
+																		Margin="-5 0"
+																		Padding="5 0">
+																		<StackPanel
+																			Orientation="Vertical"
+																			Margin="5">
+																			<StackPanel
+																				Orientation="Horizontal">
+																				<Label
+																					Content="Overlay"
+																					Width="{StaticResource Col1Width}" />
+																				<RadioButton
+																					Content="Use category overlay"
+																					IsChecked="{Binding Path=TextOverlaySource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCategory}'}"
+																					GroupName="{Binding Path=Name, Source='{StaticResource RadioTextOverlay}'}" />
+																			</StackPanel>
+																			<StackPanel
+																				Orientation="Horizontal">
+																				<Label
+																					Content=""
+																					Width="{StaticResource Col1Width}" />
+																				<RadioButton
+																					Content="Use this overlay:"
+																					IsChecked="{Binding Path=TextOverlaySource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																					GroupName="{Binding Path=Name, Source='{StaticResource RadioTextOverlay}'}" />
+																				<ComboBox
+																					DisplayMemberPath="Name"
+																					Margin="20 0 0 0"
+																					Padding="0 2 0 0"
+																					HorizontalAlignment="Left"
+																					ItemsSource="{Binding Path=App.Data.TextBehaviorGroups, Source='{StaticResource MainWindowVM}'}"
+																					IsEnabled="{Binding Path=TextOverlaySource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																					SelectedValue="{Binding Path=TextOverlay, Mode=TwoWay}" />
+																			</StackPanel>
+																		</StackPanel>
+																	</Border>
+																	<StackPanel
+																		Margin="5">
+																		<StackPanel
+																			Orientation="Horizontal"
+																			Margin="0 5 0 0">
+																			<Label
+																				Content="Colors"
+																				Width="{StaticResource Col1Width}" />
+																			<RadioButton
+																				Content="Use category colors"
+																				IsChecked="{Binding Path=TextStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCategory}'}"
+																				GroupName="{Binding Path=Name, Source='{StaticResource RadioTextStyle}'}" />
+																		</StackPanel>
+																		<StackPanel
+																			Orientation="Horizontal">
+																			<Label
+																				Content=""
+																				Width="{StaticResource Col1Width}" />
+																			<RadioButton
+																				Content="Use character colors"
+																				IsChecked="{Binding Path=TextStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCharacter}'}"
+																				GroupName="{Binding Path=Name, Source='{StaticResource RadioTextStyle}'}" />
+																		</StackPanel>
+																		<StackPanel
+																			Orientation="Horizontal">
+																			<Label
+																				Content=""
+																				Width="{StaticResource Col1Width}" />
+																			<RadioButton
+																				Content="Use these colors:"
+																				IsChecked="{Binding Path=TextStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																				GroupName="{Binding Path=Name, Source='{StaticResource RadioTextStyle}'}" />
+																			<Label
+																				Content="Font: "
+																				Margin="20 0 0 0" />
+																			<extToolkit:ColorPicker
+																				ShowAvailableColors="False"
+																				ShowRecentColors="True"
+																				Width="60"
+																				IsEnabled="{Binding Path=TextStyleSource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																				SelectedColor="{Binding Path=TextStyle.FontColor.Color, Mode=TwoWay}" />
+																		</StackPanel>
+																	</StackPanel>
+																</StackPanel>
+															</Expander>
+															<Expander
+																Header="Timer Overrides"
+																Background="#FFF5F5F5"
+																Margin="20 0 20 5">
+																<StackPanel
+																	Margin="5"
+																	Orientation="Vertical">
+																	<Border
+																		BorderBrush="#FFD3D3D3"
+																		BorderThickness="0 0 0 1"
+																		Margin="-5 0"
+																		Padding="5 0">
+																		<StackPanel
+																			Orientation="Vertical"
+																			Margin="5">
+																			<StackPanel
+																				Orientation="Horizontal">
+																				<Label
+																					Content="Overlay"
+																					Width="{StaticResource Col1Width}" />
+																				<RadioButton
+																					Content="Use category overlay"
+																					IsChecked="{Binding Path=TimerOverlaySource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCategory}'}"
+																					GroupName="{Binding Path=Name, Source='{StaticResource RadioTimerOverlay}'}" />
+																			</StackPanel>
+																			<StackPanel
+																				Orientation="Horizontal">
+																				<Label
+																					Content=""
+																					Width="{StaticResource Col1Width}" />
+																				<RadioButton
+																					Content="Use this overlay:"
+																					IsChecked="{Binding Path=TimerOverlaySource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																					GroupName="{Binding Path=Name, Source='{StaticResource RadioTimerOverlay}'}" />
+																				<ComboBox
+																					DisplayMemberPath="Name"
+																					Margin="20 0 0 0"
+																					Padding="0 2 0 0"
+																					HorizontalAlignment="Left"
+																					ItemsSource="{Binding Path=App.Data.TimerBehaviorGroups, Source='{StaticResource MainWindowVM}'}"
+																					IsEnabled="{Binding Path=TimerOverlaySource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																					SelectedValue="{Binding Path=TimerOverlay, Mode=TwoWay}" />
+																			</StackPanel>
+																		</StackPanel>
+																	</Border>
+																	<StackPanel
+																		Margin="5">
+																		<StackPanel
+																			Orientation="Horizontal"
+																			Margin="0 5 0 0">
+																			<Label
+																				Content="Colors"
+																				Width="{StaticResource Col1Width}" />
+																			<RadioButton
+																				Content="Use category colors"
+																				IsChecked="{Binding Path=TimerStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCategory}'}"
+																				GroupName="{Binding Path=Name, Source='{StaticResource RadioTimerStyle}'}" />
+																		</StackPanel>
+																		<StackPanel
+																			Orientation="Horizontal">
+																			<Label
+																				Content=""
+																				Width="{StaticResource Col1Width}" />
+																			<RadioButton
+																				Content="Use character colors"
+																				IsChecked="{Binding Path=TimerStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.FromCharacter}'}"
+																				GroupName="{Binding Path=Name, Source='{StaticResource RadioTimerStyle}'}" />
+																		</StackPanel>
+																		<StackPanel
+																			Orientation="Horizontal">
+																			<Label
+																				Content=""
+																				Width="{StaticResource Col1Width}" />
+																			<RadioButton
+																				Content="Use these colors:"
+																				IsChecked="{Binding Path=TimerStyleSource, Mode=TwoWay, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																				GroupName="{Binding Path=Name, Source='{StaticResource RadioTimerStyle}'}" />
+																			<Label
+																				Content="Font: "
+																				Margin="20 0 0 0" />
+																			<extToolkit:ColorPicker
+																				ShowAvailableColors="False"
+																				ShowRecentColors="True"
+																				Width="60"
+																				IsEnabled="{Binding Path=TimerStyleSource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																				SelectedColor="{Binding Path=TimerStyle.FontColor.Color, Mode=TwoWay}" />
+																			<Label
+																				Content="Timer Bar: "
+																				Margin="20 0 0 0" />
+																			<extToolkit:ColorPicker
+																				ShowAvailableColors="False"
+																				ShowRecentColors="True"
+																				Width="60"
+																				IsEnabled="{Binding Path=TimerStyleSource, Converter='{StaticResource ConverterEnumToBoolean}', ConverterParameter='{x:Static biz:InheritanceSources.None}'}"
+																				SelectedColor="{Binding Path=TimerStyle.TimerBarColor, Mode=TwoWay}" />
+																		</StackPanel>
+																	</StackPanel>
+																</StackPanel>
+															</Expander>
+														</StackPanel>
+													</Expander>
+												</DataTemplate>
+											</ItemsControl.ItemTemplate>
+										</ListView>
+									</GroupBox>
+								</StackPanel>
+							</DataTemplate>
+						</TabControl.ContentTemplate>
+					</TabControl>
+				</ScrollViewer>
+				<shared:SimpleDialog
+					Title="Confirm"
+					Message="Are you sure that you want to remove this trigger category?"
+					BorderColor="#FF8B0000"
+					ShowOKButton="True"
+					OKButtonText="Yes"
+					ShowCancelButton="True"
+					CancelButtonText="No"
+					Visibility="{Binding Path=ShowDeleteTriggerCategoryConfirm, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+					OKButtonCommand="{Binding Path=DeleteTriggerCategoryCommand}"
+					CancelButtonCommand="{Binding CancelDeleteCommand}" />
+			</Grid>
+			<Grid
+				Row="1"
+				Visibility="{Binding Path=SelectedIndex, ElementName=MainRibbon, Converter='{StaticResource ConverterInListToVisibility}', ConverterParameter=3|4#collapsed}">
+				<Grid.RowDefinitions>
+					<RowDefinition
+						Height="*"
+						MinHeight="120" />
+					<RowDefinition
+						Height="Auto" />
+					<RowDefinition
+						Height="Auto" />
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition
+						Width="2*"
+						MinWidth="50" />
+					<ColumnDefinition
+						Width="Auto" />
+					<ColumnDefinition
+						Width="3*"
+						MinWidth="50" />
+				</Grid.ColumnDefinitions>
+				<FlowDocumentScrollViewer
+					Grid.Row="0"
+					Grid.Column="0"
+					VerticalAlignment="Stretch"
+					HorizontalAlignment="Stretch"
+					VerticalContentAlignment="Top"
+					HorizontalContentAlignment="Left"
+					Visibility="{Binding Path=App.Data.Characters.Count, Converter='{StaticResource ConverterInRangeToVisibility}', ConverterParameter=0|0}">
+					<FlowDocument>
+						<Paragraph
+							Margin="10 40 10 0"
+							TextAlignment="Center"
+							Foreground="#FFFF0000">Click on the <Image
+								Source="pack://application:,,,/Resources/AddCharacter.png"
+								Width="24"
+								Height="24" /> icon above to add characters to monitor.</Paragraph>
+					</FlowDocument>
+				</FlowDocumentScrollViewer>
+				<ListView
+					Name="CharacterListView"
+					SelectionMode="Extended"
+					Grid.Row="0"
+					Grid.Column="0"
+					AllowDrop="True"
+					ItemsSource="{Binding Path=App.Data.Characters}"
+					Visibility="{Binding Path=App.Data.Characters.Count, Converter='{StaticResource ConverterInRangeToVisibility}', ConverterParameter=0|0|collapsed}"
+					PreviewMouseLeftButtonDown="CharacterListView_PreviewMouseLeftButtonDown"
+					PreviewMouseMove="CharacterListView_PreviewMouseMove"
+					DragEnter="CharacterListView_DragEnter"
+					DragOver="CharacterListView_DragOver"
+					Drop="CharacterListView_Drop">
+					<i:Interaction.Triggers>
+						<i:EventTrigger
+							EventName="SelectionChanged">
+							<cmd:EventToCommand
+								PassEventArgsToCommand="True"
+								Command="{Binding CharacterSelectionChangedCommand}" />
+						</i:EventTrigger>
+						<i:EventTrigger
+							EventName="MouseDoubleClick">
+							<cmd:EventToCommand
+								Command="{Binding EditCharacterCommand}" />
+						</i:EventTrigger>
+					</i:Interaction.Triggers>
+					<ItemsControl.ItemContainerStyle>
+						<Style
+							TargetType="{x:Type ListViewItem}">
+							<Setter
+								Property="Background"
+								Value="#00FFFFFF" />
+							<Setter
+								Property="Template">
+								<Setter.Value>
+									<ControlTemplate
+										TargetType="{x:Type ListViewItem}" >
+										<Border
+											SnapsToDevicePixels="True"
+											Style="{StaticResource characterStyle}"
+											CornerRadius="5"
+											Height="30"
+											Margin="0 0 0 2">
+											<ContentPresenter
+												HorizontalAlignment="Stretch"
+												VerticalAlignment="Center"
+												SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+										</Border>
+									</ControlTemplate>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</ItemsControl.ItemContainerStyle>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate
+							DataType="{x:Type biz:GINACharacter}">
+							<Grid
+								Margin="10 0"
+								HorizontalAlignment="Stretch"
+								Column="0">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition
+										Width="Auto" />
+									<ColumnDefinition />
+									<ColumnDefinition
+										Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<Button
+									Margin="3 0 10 0"
+									Grid.Column="0"
+									Command="{Binding Path=ToggleMonitorCommand, Source='{StaticResource MainWindowVM}'}"
+									CommandParameter="{Binding Path=Character}">
+									<Control.Template>
+										<ControlTemplate>
+											<Image
+												x:Name="imgMonitor"
+												Source="pack://application:,,,/Resources/Play16.png"
+												Height="15" />
+											<ControlTemplate.Triggers>
+												<DataTrigger
+													Value="True"
+													Binding="{Binding Character.IsEnabled}">
+													<Setter
+														TargetName="imgMonitor"
+														Property="Image.Source"
+														Value="pack://application:,,,/Resources/Stop16.png" />
+												</DataTrigger>
+											</ControlTemplate.Triggers>
+										</ControlTemplate>
+									</Control.Template>
+								</Button>
+								<TextBlock
+									Style="{StaticResource characterForeStyle}"
+									FontSize="13"
+									VerticalAlignment="Center"
+									Grid.Column="1"
+									Text="{Binding Path=Character.DisplayName}" />
+								<Image
+									Source="pack://application:,,,/Resources/Warning.png"
+									ToolTip="The specified log file does not exist."
+									Stretch="None"
+									Margin="2 0 0 0"
+									Grid.Column="2"
+									Visibility="{Binding Path=Character.HasInvalidFile, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+							</Grid>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ListView>
+				<GridSplitter
+					HorizontalAlignment="Right"
+					VerticalAlignment="Stretch"
+					Grid.Row="0"
+					Grid.Column="1"
+					ResizeBehavior="PreviousAndNext"
+					Width="2"
+					Background="#FFBCBCBC" />
+				<shared:TreeList
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Stretch"
+					SelectionMode="Extended"
+					AllowDrop="True"
+					ImagePadding="2 2 4 2"
+					Grid.Row="0"
+					Grid.Column="2"
+					RootItem="{Binding Path=RootTriggerGroup, Source='{StaticResource MainWindowVM}'}">
+					<i:Interaction.Triggers>
+						<i:EventTrigger
+							EventName="QueryCanDrop">
+							<cmd:EventToCommand
+								PassEventArgsToCommand="True"
+								Command="{Binding Path=IsDropAllowedCommand}" />
+						</i:EventTrigger>
+						<i:EventTrigger
+							EventName="DropItems">
+							<cmd:EventToCommand
+								PassEventArgsToCommand="True"
+								Command="{Binding Path=MoveEntriesCommand}" />
+						</i:EventTrigger>
+						<i:EventTrigger
+							EventName="TreeSelectionChanged">
+							<cmd:EventToCommand
+								PassEventArgsToCommand="True"
+								Command="{Binding Path=SelectedViewModelsChangedCommand}" />
+						</i:EventTrigger>
+						<i:EventTrigger
+							EventName="MouseDoubleClick">
+							<cmd:EventToCommand
+								PassEventArgsToCommand="True"
+								Command="{Binding EditTriggerOrGroupCommand}" />
+						</i:EventTrigger>
+					</i:Interaction.Triggers>
+					<FrameworkElement.Resources>
+						<ResourceDictionary>
+							<ContextMenu
+								x:Key="GroupMenu"
+								DataContext="{StaticResource MainWindowVM}">
+								<MenuItem
+									Header="Edit"
+									IsEnabled="{Binding Path=SelectedTriggerGroup, Converter={StaticResource ConverterNullToBoolean}}"
+									Command="{Binding Path=EditTriggerOrGroupCommand}" />
+								<Separator />
+								<MenuItem
+									Header="Send To Clipboard">
+									<MenuItem
+										Header="Quick Share"
+										IsEnabled="{Binding Path=SelectedIsExportable}"
+										Command="{Binding Path=ClipboardQuickShareCommand}" />
+									<MenuItem
+										Header="GamTextTriggers Format"
+										IsEnabled="False"
+										Command="{Binding Path=ClipboardGamTextTriggerCommand}" />
+									<MenuItem
+										Header="Trigger Search Text"
+										IsEnabled="False"
+										Command="{Binding Path=ClipboardTriggerSearchTextCommand}" />
+								</MenuItem>
+								<Separator />
+								<MenuItem
+									Header="Add Group"
+									CommandParameter="selected"
+									IsEnabled="{Binding Path=SelectedTriggerGroup, Converter={StaticResource ConverterNullToBoolean}}"
+									Command="{Binding Path=AddTriggerGroupCommand}" />
+								<MenuItem
+									Header="Add Trigger"
+									IsEnabled="{Binding Path=SelectedTriggerGroup, Converter={StaticResource ConverterNullToBoolean}}"
+									Command="{Binding Path=AddTriggerCommand}" />
+								<Separator />
+								<MenuItem
+									Header="Cut"
+									IsEnabled="{Binding Path=SelectedEntries, Converter={StaticResource ConverterEmptyCollectionToBoolean}}"
+									Command="{Binding Path=CutEntriesCommand}" />
+								<MenuItem
+									Header="Paste"
+									IsEnabled="{Binding Path=CanPasteEntries}"
+									Command="{Binding Path=PasteEntriesCommand}" />
+								<MenuItem
+									Header="Delete"
+									IsEnabled="{Binding Path=SelectedTriggerGroup, Converter={StaticResource ConverterNullToBoolean}}"
+									Command="{Binding Path=ConfirmDeleteTriggerGroupCommand}" />
+							</ContextMenu>
+							<ContextMenu
+								x:Key="TriggerMenu"
+								DataContext="{StaticResource MainWindowVM}">
+								<MenuItem
+									Header="Edit"
+									IsEnabled="{Binding Path=SelectedTrigger, Converter={StaticResource ConverterNullToBoolean}}"
+									Command="{Binding Path=EditTriggerOrGroupCommand}" />
+								<Separator />
+								<MenuItem
+									Header="Send To Clipboard">
+									<MenuItem
+										Header="Quick Share"
+										IsEnabled="{Binding Path=SelectedIsExportable}"
+										Command="{Binding Path=ClipboardQuickShareCommand}" />
+									<MenuItem
+										Header="GamTextTriggers Format"
+										IsEnabled="{Binding Path=SelectedTrigger, Converter={StaticResource ConverterNullToBoolean}}"
+										Command="{Binding Path=ClipboardGamTextTriggerCommand}" />
+									<MenuItem
+										Header="Trigger Search Text"
+										IsEnabled="{Binding Path=SelectedTrigger, Converter={StaticResource ConverterNullToBoolean}}"
+										Command="{Binding Path=ClipboardTriggerSearchTextCommand}" />
+								</MenuItem>
+								<Separator />
+								<MenuItem
+									Header="Cut"
+									IsEnabled="{Binding Path=SelectedEntries, Converter={StaticResource ConverterEmptyCollectionToBoolean}}"
+									Command="{Binding Path=CutEntriesCommand}" />
+								<MenuItem
+									Header="Delete"
+									IsEnabled="{Binding Path=SelectedTrigger, Converter={StaticResource ConverterNullToBoolean}}"
+									Command="{Binding Path=ConfirmDeleteTriggerCommand}" />
+							</ContextMenu>
+							<DataTemplate
+								x:Key="tvTriggerTemplate"
+								DataType="{x:Type local:TriggerViewModel}">
+								<StackPanel
+									Orientation="Horizontal"
+									Height="22"
+									Focusable="True"
+									ToolTipService.ShowDuration="30000"
+									ContextMenu="{StaticResource TriggerMenu}">
+									<FrameworkElement.ToolTip>
+										<ToolTip
+											Style="{StaticResource TriggerTooltip}"
+											DataContext="{Binding Path=PlacementTarget.DataContext.DataItem.Trigger, RelativeSource={RelativeSource Self}}" />
+									</FrameworkElement.ToolTip>
+									<FrameworkElement.Style>
+										<Style
+											TargetType="{x:Type StackPanel}">
+											<Style.Triggers>
+												<DataTrigger
+													Value="True"
+													Binding="{Binding Path=IsSelected}">
+													<Setter
+														Property="Background"
+														Value="#FF3399FF" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</FrameworkElement.Style>
+									<TextBlock
+										Margin="17 0 0 0"
+										Focusable="False"
+										Visibility="{Binding Path=DataItem.GroupVM.MainVM.SelectedCharacters, Converter={StaticResource ConverterEmptyCollectionToVisibility}}" />
+									<Image
+										Source="pack://application:,,,/Resources/Trigger.png"
+										Stretch="None"
+										Margin="0 0 3 0"
+										Focusable="False"
+										VerticalAlignment="Center" />
+									<TextBlock
+										Focusable="True"
+										VerticalAlignment="Center"
+										Text="{Binding Path=DataItem.Trigger.Name}">
+										<FrameworkElement.Style>
+											<Style
+												TargetType="{x:Type TextBlock}">
+												<Style.Triggers>
+													<DataTrigger
+														Value="True"
+														Binding="{Binding Path=IsSelected}">
+														<Setter
+															Property="Foreground"
+															Value="#FFFFFFFF" />
+													</DataTrigger>
+												</Style.Triggers>
+											</Style>
+										</FrameworkElement.Style>
+									</TextBlock>
+								</StackPanel>
+							</DataTemplate>
+							<DataTemplate
+								x:Key="tvGroupTemplate"
+								DataType="{x:Type local:TriggerGroupViewModel}">
+								<StackPanel
+									Orientation="Horizontal"
+									Height="22"
+									Focusable="True"
+									ContextMenu="{StaticResource GroupMenu}">
+									<FrameworkElement.ToolTip>
+										<ToolTip
+											Style="{StaticResource TriggerGroupTooltip}"
+											DataContext="{Binding Path=PlacementTarget.DataContext.DataItem.TriggerGroup, RelativeSource={RelativeSource Self}}" />
+									</FrameworkElement.ToolTip>
+									<FrameworkElement.Style>
+										<Style
+											TargetType="{x:Type StackPanel}">
+											<Style.Triggers>
+												<DataTrigger
+													Value="True"
+													Binding="{Binding Path=IsSelected}">
+													<Setter
+														Property="Background"
+														Value="#FF3399FF" />
+												</DataTrigger>
+											</Style.Triggers>
+										</Style>
+									</FrameworkElement.Style>
+									<CheckBox
+										Focusable="False"
+										VerticalAlignment="Center"
+										Margin="0 0 2 0"
+										Width="15"
+										Visibility="{Binding Path=DataItem.MainVM.SelectedCharacters, Converter={StaticResource ConverterEmptyCollectionToVisibility}}"
+										IsChecked="{Binding Path=DataItem.IsActive, Mode=TwoWay}" />
+									<Image
+										Source="pack://application:,,,/Resources/TriggerGroup.png"
+										Stretch="None"
+										Margin="0 0 4 0" />
+									<TextBlock
+										VerticalAlignment="Center"
+										Focusable="True"
+										Text="{Binding Path=DataItem.TriggerGroup.Name}">
+										<FrameworkElement.Style>
+											<Style
+												TargetType="{x:Type TextBlock}">
+												<Style.Triggers>
+													<DataTrigger
+														Value="True"
+														Binding="{Binding Path=IsSelected}">
+														<Setter
+															Property="Foreground"
+															Value="#FFFFFFFF" />
+													</DataTrigger>
+												</Style.Triggers>
+											</Style>
+										</FrameworkElement.Style>
+									</TextBlock>
+								</StackPanel>
+							</DataTemplate>
+						</ResourceDictionary>
+					</FrameworkElement.Resources>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<ContentControl
+								Content="{Binding}">
+								<FrameworkElement.Style>
+									<Style
+										TargetType="{x:Type ContentControl}">
+										<Style.Triggers>
+											<DataTrigger
+												Value="True"
+												Binding="{Binding Path=DataItem.IsTriggerView}">
+												<Setter
+													Property="ContentTemplate"
+													Value="{StaticResource tvTriggerTemplate}" />
+											</DataTrigger>
+											<DataTrigger
+												Value="True"
+												Binding="{Binding Path=DataItem.IsTriggerGroupView}">
+												<Setter
+													Property="ContentTemplate"
+													Value="{StaticResource tvGroupTemplate}" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</FrameworkElement.Style>
+							</ContentControl>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</shared:TreeList>
+				<GridSplitter
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Bottom"
+					Grid.Row="1"
+					Grid.Column="0"
+					Grid.ColumnSpan="3"
+					ResizeBehavior="PreviousAndNext"
+					Height="2"
+					Background="#FFBCBCBC"
+					Visibility="{Binding Path=Settings.DisplayMatches, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+				<DataGrid
+					HorizontalAlignment="Stretch"
+					HorizontalContentAlignment="Left"
+					IsReadOnly="True"
+					ClipboardCopyMode="IncludeHeader"
+					SelectionUnit="FullRow"
+					SelectionMode="Extended"
+					AutoGenerateColumns="False"
+					VerticalAlignment="Stretch"
+					ScrollViewer.CanContentScroll="True"
+					Grid.Row="2"
+					Grid.Column="0"
+					Grid.ColumnSpan="3"
+					ItemsSource="{Binding Path=App.Data.LoggedMatches}"
+					Visibility="{Binding Path=App.Data.LoggedMatches.Count, Converter='{StaticResource ConverterInRangeToVisibility}', ConverterParameter=0|0|collapsed}">
+					<FrameworkElement.Resources>
+						<ResourceDictionary>
+							<Style
+								x:Key="tbGrid"
+								TargetType="{x:Type TextBlock}">
+								<Setter
+									Property="FontSize"
+									Value="12" />
+							</Style>
+						</ResourceDictionary>
+					</FrameworkElement.Resources>
+					<FrameworkElement.ContextMenu>
+						<ContextMenu
+							DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Mode=Self}}">
+							<MenuItem
+								Header="Copy"
+								Command="Copy" />
+							<MenuItem
+								Header="Copy as HTML"
+								Command="{Binding Path=ClipboardLogAsHTML, Source='{StaticResource MainWindowVM}'}"
+								CommandParameter="{Binding Path=SelectedItems}" />
+							<MenuItem
+								Header="Select All"
+								Command="SelectAll" />
+						</ContextMenu>
+					</FrameworkElement.ContextMenu>
+					<DataGrid.Columns>
+						<DataGridTemplateColumn
+							Header="Character"
+							ClipboardContentBinding="{Binding Path=TriggerFilter.Character.DisplayName}">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=TriggerFilter.Character.DisplayName}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							Header="Trigger"
+							ClipboardContentBinding="{Binding Path=TriggerFilter.Trigger.TriggerPath}">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<Button
+										Style="{StaticResource LinkButtonStyle}"
+										FontSize="12"
+										ToolTipService.ShowDuration="30000"
+										Content="{Binding Path=TriggerFilter.Trigger.Name}"
+										Command="{Binding Path=EditTriggerCommand, Source='{StaticResource MainWindowVM}'}"
+										CommandParameter="{Binding Path=TriggerFilter.Trigger}">
+										<FrameworkElement.ToolTip>
+											<ToolTip
+												Style="{StaticResource TriggerTooltip}"
+												DataContext="{Binding Path=PlacementTarget.DataContext.TriggerFilter.Trigger, RelativeSource={RelativeSource Self}}" />
+										</FrameworkElement.ToolTip>
+									</Button>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							Header="Matched Text"
+							ClipboardContentBinding="{Binding Path=MatchedText}">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=MatchedText}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							Header="Log Time"
+							ClipboardContentBinding="{Binding Path=LoggedTime, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:MM/dd/yyyy hh:mm:ss tt}'}">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<TextBlock
+										Style="{StaticResource tbGrid}"
+										Text="{Binding Path=LoggedTime, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:MM/dd/yyyy hh:mm:ss tt}'}" />
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+						<DataGridTemplateColumn
+							Header="Match Time"
+							ClipboardContentBinding="{Binding Path=MatchedTime, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:MM/dd/yyyy hh:mm:ss tt}'}">
+							<DataGridTemplateColumn.CellTemplate>
+								<DataTemplate>
+									<StackPanel>
+										<FrameworkElement.Style>
+											<Style
+												TargetType="{x:Type StackPanel}">
+												<Style.Triggers>
+													<DataTrigger
+														Value="0"
+														Binding="{Binding Path=Delay}">
+														<Setter
+															Property="Background"
+															Value="#00FFFFFF" />
+													</DataTrigger>
+												</Style.Triggers>
+											</Style>
+										</FrameworkElement.Style>
+										<TextBlock
+											Style="{StaticResource tbGrid}"
+											Text="{Binding Path=MatchedTime, Converter='{StaticResource ConverterStringFormat}', ConverterParameter='{}{0:MM/dd/yyyy hh:mm:ss tt}'}" />
+									</StackPanel>
+								</DataTemplate>
+							</DataGridTemplateColumn.CellTemplate>
+						</DataGridTemplateColumn>
+					</DataGrid.Columns>
+				</DataGrid>
+			</Grid>
+		</Grid>
+		<local:LogSearchControl
+			Visibility="{Binding Path=ShowLogSearchDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+		<local:TriggerSearchControl
+			Visibility="{Binding Path=ShowTriggerSearchDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+		<local:PhoneticDictionaryEditor
+			Visibility="{Binding Path=ShowPhoneticDictionaryEditor, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+		<local:TriggerEditor
+			Visibility="{Binding Path=ShowTriggerEditor, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			TriggerGroup="{Binding Path=SelectedTriggerGroup}"
+			Trigger="{Binding Path=EditingTrigger}" />
+		<local:TriggerGroupEditor
+			Visibility="{Binding Path=ShowTriggerGroupEditor, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			TriggerGroup="{Binding Path=EditingTriggerGroup}"
+			ParentGroup="{Binding Path=ParentTriggerGroup}" />
+		<local:CharacterEditor
+			Visibility="{Binding Path=ShowCharacterEditor, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			Character="{Binding Path=CharacterToEdit}" />
+		<local:PreferencesEditor
+			Visibility="{Binding Path=ShowPreferencesEditor, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+		<local:UploadControl
+			Visibility="{Binding Path=ShowUploadDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			SelectedEntries="{Binding Path=SelectedEntries, Mode=OneWay}"
+			AutoClipboard="{Binding Path=UploadToClipboard}"
+			IsRepositoryUpload="{Binding Path=IsRepositoryUpload}" />
+		<local:DownloadControl />
+		<shared:SimpleDialog
+			Title="Confirm"
+			Message="Are you sure that you want to remove these characters?"
+			BorderColor="#FF8B0000"
+			ShowOKButton="True"
+			OKButtonText="Yes"
+			ShowCancelButton="True"
+			CancelButtonText="No"
+			Visibility="{Binding Path=ShowDeleteCharacterConfirm, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			OKButtonCommand="{Binding Path=DeleteCharactersCommand}"
+			CancelButtonCommand="{Binding CancelDeleteCommand}" />
+		<shared:SimpleDialog
+			Title="Confirm"
+			Message="Are you sure that you want to remove this trigger group, including all groups and triggers beneath it?"
+			ContentWidth="400"
+			BorderColor="#FF8B0000"
+			ShowOKButton="True"
+			OKButtonText="Yes"
+			ShowCancelButton="True"
+			CancelButtonText="No"
+			Visibility="{Binding Path=ShowDeleteTriggerGroupConfirm, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			OKButtonCommand="{Binding Path=DeleteTriggerGroupCommand}"
+			CancelButtonCommand="{Binding CancelDeleteCommand}" />
+		<shared:SimpleDialog
+			Title="Confirm"
+			Message="Are you sure that you want to remove this trigger?"
+			BorderColor="#FF8B0000"
+			ShowOKButton="True"
+			OKButtonText="Yes"
+			ShowCancelButton="True"
+			CancelButtonText="No"
+			Visibility="{Binding Path=ShowDeleteTriggerConfirm, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			OKButtonCommand="{Binding Path=DeleteTriggerCommand}"
+			CancelButtonCommand="{Binding CancelDeleteCommand}" />
+		<local:ApplicationUpdateControl
+			Visibility="{Binding Path=ShowAppUpdateDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			UseAutoMode="{Binding Path=UseAutoUpdateMode, Mode=TwoWay}" />
+		<local:EverquestTriggerSetSelector
+			Visibility="{Binding Path=ShowEQImportDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+		<local:EverquestCharacterSetSelector
+			Visibility="{Binding Path=ShowEQExportDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
+			SelectedTriggerGroup="{Binding Path=SelectedTriggerGroup}"
+			SelectedTrigger="{Binding Path=SelectedTrigger}" />
+		<shared:SimpleDialog
+			BorderColor="#FF8B0000"
+			ShowOKButton="True"
+			OKButtonText="OK"
+			Title="{Binding Path=App.Data.ErrorTitle}"
+			Message="{Binding Path=App.Data.ErrorMessage}"
+			Visibility="{Binding Path=App.Data.ErrorMessage, Mode=TwoWay, Converter='{StaticResource ConverterNullToVisibility}', ConverterParameter=collapsed}"
+			OKButtonCommand="{Binding Path=App.Data.CloseErrorCommand}" />
+		<shared:DialogOverlay
+			Title="About"
+			Visibility="{Binding Path=ShowAboutDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}">
+			<StackPanel>
+				<StackPanel
+					Orientation="Horizontal">
+					<Image
+						Source="pack://application:,,,/Resources/GinaLarge.ico"
+						Width="64"
+						Height="64" />
+					<FlowDocumentScrollViewer
+						Grid.Row="1"
+						Grid.Column="0"
+						VerticalAlignment="Center"
+						HorizontalAlignment="Stretch"
+						VerticalContentAlignment="Center"
+						HorizontalContentAlignment="Left"
+						VerticalScrollBarVisibility="Disabled"
+						HorizontalScrollBarVisibility="Disabled"
+						Width="400">
+						<FlowDocument
+							FontSize="14">
+							<Paragraph
+								TextAlignment="Left">Gimagukk's Incantatory Notation Apparatus (GINA)</Paragraph>
+							<Paragraph
+								TextAlignment="Left">Version <TextBlock
+									Text="{Binding Path=AppVersion}" /></Paragraph>
+						</FlowDocument>
+					</FlowDocumentScrollViewer>
+				</StackPanel>
+				<Button
+					Content="OK"
+					HorizontalAlignment="Right"
+					Width="80"
+					Command="{Binding Path=ToggleAboutDialogCommand}" />
+			</StackPanel>
+		</shared:DialogOverlay>
+		<local:ErrorReportControl
+			Visibility="{Binding Path=ShowErrorUploadDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
+	</Grid>
+</r:RibbonWindow>

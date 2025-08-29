@@ -1,0 +1,93 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile CurrentProfile="(Default)" GeneratedClassNamespace="GimaSoft.Business.GINA.Properties" GeneratedClassName="Settings" xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="DataFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)"></Value>
+    </Setting>
+    <Setting Name="MediaFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.</Value>
+    </Setting>
+    <Setting Name="EverquestGameFile" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">eqgame.exe</Value>
+    </Setting>
+    <Setting Name="EverquestAudioTriggersFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AudioTriggers</Value>
+    </Setting>
+    <Setting Name="EverquestUserDataFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">userdata</Value>
+    </Setting>
+    <Setting Name="EverquestUIFileRegex" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ui_(?'char'.+)_(?'server'\w+)\.ini</Value>
+    </Setting>
+    <Setting Name="EverquestATFileRegex" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AT_(?&lt;triggerSet&gt;\w+)_(?&lt;char&gt;\w+)_(?&lt;server&gt;\w+)\.ini</Value>
+    </Setting>
+    <Setting Name="EverquestATFileFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AT_{0}_{1}_{2}.ini</Value>
+    </Setting>
+    <Setting Name="EverquestUIFileMask" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ui_*_*.ini</Value>
+    </Setting>
+    <Setting Name="EverquestATFileMask" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AT_*_*_*.ini</Value>
+    </Setting>
+    <Setting Name="EverquestTriggerFileRegex" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Pattern(?&lt;id&gt;[0-9]*)=(?&lt;pattern&gt;[^\r\n]+)\r\nSound[0-9]*=(?&lt;sound&gt;[^\r\n]*)</Value>
+    </Setting>
+    <Setting Name="EverquestLogLineFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">^\[\w{3} (?'month'\w{3}) (?'date'\d{1,2}) (?'hour'\d{1,2}):(?'minute'\d{2}):(?'second'\d{2}) (?'year'\d{4})\]\s(?'text'.+)$</Value>
+    </Setting>
+    <Setting Name="EverquestShareFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">^\[[^\]]+\] (?'name'\w+).+\{GINA:(?'sessionid'[^\}]+)\}</Value>
+    </Setting>
+    <Setting Name="DefaultShareFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">\{GINA:(?'sessionid'[^\}]+)\}</Value>
+    </Setting>
+    <Setting Name="DefaultShareServiceUri" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://eq.gimasoft.com/GINAServices/Package.svc</Value>
+    </Setting>
+    <Setting Name="EverquestLogFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Logs</Value>
+    </Setting>
+    <Setting Name="EverquestMetadataExtension" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">gin</Value>
+    </Setting>
+    <Setting Name="GINAPackageFileExtension" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">gtp</Value>
+    </Setting>
+    <Setting Name="GamTextTriggerExtension" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">gtt</Value>
+    </Setting>
+    <Setting Name="GamTextTriggerImportRegex" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Trigger=(?&lt;TriggerText&gt;.+);Comment=(?&lt;Comments&gt;.+);Display=.+;ShowText=(?&lt;UseText&gt;.+);DisplayText=(?&lt;DisplayText&gt;.+);ShowLine=(?&lt;ShowLine&gt;.+);TextColour=(?&lt;OverlayColor&gt;.+);Timer=(?&lt;UseTimer&gt;.+);TimerText=(?&lt;TimerText&gt;.+);Hours=(?&lt;TimerHours&gt;.+);Minutes=(?&lt;TimerMinutes&gt;.+);Seconds=(?&lt;TimerSeconds&gt;.+);Behaviour=(?&lt;TimerBehavior&gt;.+);CompletionDisplay=(?&lt;UseTimerCompleteText&gt;.+);CompletionText=(?&lt;TimerCompleteText&gt;.+);EndEarly=(?&lt;UseTimerEndEarlyText&gt;.+);EndEarlyText=(?&lt;TimerEndEarlyText&gt;.+);Sound=(?&lt;UseSound&gt;.+);PlaySound=(?&lt;PlayMediaFile&gt;.+);SoundLink=(?&lt;MediaFileName&gt;.+);PlayTTS=(?&lt;UseTextToVoice&gt;.+);TTSText=(?&lt;TextToVoiceText&gt;.+);</Value>
+    </Setting>
+    <Setting Name="GamTextTriggerExportFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Trigger={TriggerText};Comment={Comments};Display={UseText};ShowText={ShowText};DisplayText={DisplayText};ShowLine={ShowLine};TextColour={OverlayColor};Timer={UseTimer};TimerText={TimerText};Hours={TimerHours};Minutes={TimerMinutes};Seconds={TimerSeconds};Behaviour={TimerBehavior};CompletionDisplay={UseTimerCompleteText};CompletionText={TimerCompleteText};EndEarly={UseTimerEndEarlyText};EndEarlyText={TimerEndEarlyText};Sound={UseSound};PlaySound={PlayMediaFile};SoundLink={MediaFileName};PlayTTS={UseTextToVoice};TTSText={TextToVoiceText};</Value>
+    </Setting>
+    <Setting Name="GamTextTriggerClipboardFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">GTT:{0}</Value>
+    </Setting>
+    <Setting Name="GamTextTriggerFastMatch" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">GTT:Trigger=</Value>
+    </Setting>
+    <Setting Name="GamTextTriggerShareRegex" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">^(?'name'\w+).+GTT:Trigger=</Value>
+    </Setting>
+    <Setting Name="LastKnownGoodExtension" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">lkg</Value>
+    </Setting>
+    <Setting Name="BadFileExtension" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">bad</Value>
+    </Setting>
+    <Setting Name="GINAChangeLogURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://eq.gimasoft.com/gina/changelog.aspx</Value>
+    </Setting>
+    <Setting Name="EverquestGINACommandFormat" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">^((You)|({C})) .*\{GINA:(?'cmd'[^\}]+)\}</Value>
+    </Setting>
+    <Setting Name="EverquestFastSearchSkip" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">27</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

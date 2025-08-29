@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{C56E7E88-2E5A-4EB3-B0C9-49A63CC91F4E}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>GimaSoft.GINA</RootNamespace>
+    <AssemblyName>GINA</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60DC8134-EBA5-43B8-BCC9-BB4BC16C2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <ApplicationIcon>GINA.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="GalaSoft.MvvmLight.Extras.WPF4">
+      <HintPath>.\GalaSoft.MvvmLight.Extras.WPF4.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.WPF4">
+      <HintPath>.\GalaSoft.MvvmLight.WPF4.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Windows.Shell">
+      <HintPath>.\Microsoft.Windows.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="RibbonControlsLibrary">
+      <HintPath>C:\Users\scott\OneDrive\Desktop\GINA\RibbonControlsLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Speech" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WPFShared">
+      <HintPath>C:\Users\scott\OneDrive\Desktop\GINA\WPFShared.dll</HintPath>
+    </Reference>
+    <Reference Include="WPFToolkit.Extended">
+      <HintPath>C:\Users\scott\OneDrive\Desktop\GINA\WPFToolkit.Extended.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Interactivity">
+      <HintPath>.\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ApplicationUpdateControl.cs" />
+    <Compile Include="CharacterAndCategoryConverter.cs" />
+    <Compile Include="CharacterConverterOverrideTextConverter.cs" />
+    <Compile Include="CharacterEditor.cs" />
+    <Compile Include="CharacterViewModel.cs" />
+    <Compile Include="DownloadControl.cs" />
+    <Compile Include="EditorModes.cs" />
+    <Compile Include="ErrorReportControl.cs" />
+    <Compile Include="EverquestCharacterSetSelector.cs" />
+    <Compile Include="EverquestFolderViewModel.cs" />
+    <Compile Include="EverquestTriggerSetSelector.cs" />
+    <Compile Include="GINAData.cs" />
+    <Compile Include="GINAViewModel.cs" />
+    <Compile Include="LogSearchControl.cs" />
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MainWindowViewModel.cs" />
+    <Compile Include="PhoneticDictionaryEditor.cs" />
+    <Compile Include="PreferencesEditor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <DependentUpon>Settings.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="RepositoryEntryFacade.cs" />
+    <Compile Include="RepositorySubmission.cs" />
+    <Compile Include="TextWindow.xaml.cs">
+      <DependentUpon>TextWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TextWindowViewModel.cs" />
+    <Compile Include="TimerWindow.xaml.cs">
+      <DependentUpon>TimerWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="TimerWindowViewModel.cs" />
+    <Compile Include="TriggerAndGroupViewModel.cs" />
+    <Compile Include="TriggerCategoryViewModel.cs" />
+    <Compile Include="TriggerEditor.cs" />
+    <Compile Include="TriggerGroupEditor.cs" />
+    <Compile Include="TriggerGroupViewModel.cs" />
+    <Compile Include="TriggerNotificationEditor.cs" />
+    <Compile Include="TriggerSearchControl.cs" />
+    <Compile Include="TriggerViewModel.cs" />
+    <Compile Include="UploadControl.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resources" />
+    <EmbeddedResource Include="Resources\DefaultSettings.xml" />
+    <EmbeddedResource Include="Resources\GinaTray.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BusinessShared\BusinessShared.csproj">
+      <Project>{c56e7e88-2e5a-4eb3-b0c9-49a63cc91f48}</Project>
+      <Name>BusinessShared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GimaSoft.Business.GINA\GimaSoft.Business.GINA.csproj">
+      <Project>{c56e7e88-2e5a-4eb3-b0c9-49a63cc91f4b}</Project>
+      <Name>GimaSoft.Business.GINA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GimaSoft.Communication.GINA\GimaSoft.Communication.GINA.csproj">
+      <Project>{c56e7e88-2e5a-4eb3-b0c9-49a63cc91f4c}</Project>
+      <Name>GimaSoft.Communication.GINA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GimaSoft.Service.GINA\GimaSoft.Service.GINA.csproj">
+      <Project>{c56e7e88-2e5a-4eb3-b0c9-49a63cc91f4d}</Project>
+      <Name>GimaSoft.Service.GINA</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="sharedresources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TextWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="themes\generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TimerWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="clickonceflag.txt" />
+    <Resource Include="resources\add.png" />
+    <Resource Include="resources\addcategory.png" />
+    <Resource Include="resources\addcharacter.png" />
+    <Resource Include="resources\addoverlay.png" />
+    <Resource Include="resources\addtimeroverlay.png" />
+    <Resource Include="resources\addtrigger.png" />
+    <Resource Include="resources\addtriggergroup.png" />
+    <Resource Include="resources\command.png" />
+    <Resource Include="resources\default.png" />
+    <Resource Include="resources\defaultcategory.png" />
+    <Resource Include="resources\delete.png" />
+    <Resource Include="resources\edit.png" />
+    <Resource Include="resources\editcategories.png" />
+    <Resource Include="resources\editcharacter.png" />
+    <Resource Include="resources\editpreferences.png" />
+    <Resource Include="resources\edittrigger.png" />
+    <Resource Include="resources\edittriggergroup.png" />
+    <Resource Include="resources\ginaexport.png" />
+    <Resource Include="resources\ginaimport.png" />
+    <Resource Include="resources\ginalarge.ico" />
+    <Resource Include="resources\inserttriggergroup.png" />
+    <Resource Include="resources\openrepository.png" />
+    <Resource Include="resources\overlay.png" />
+    <Resource Include="resources\pause32.png" />
+    <Resource Include="resources\phonetictransforms.png" />
+    <Resource Include="resources\play16.png" />
+    <Resource Include="resources\play32.png" />
+    <Resource Include="resources\recentpackage.png" />
+    <Resource Include="resources\refresh32.png" />
+    <Resource Include="resources\removecategory.png" />
+    <Resource Include="resources\removecharacter.png" />
+    <Resource Include="resources\removetrigger.png" />
+    <Resource Include="resources\removetriggergroup.png" />
+    <Resource Include="resources\replace.png" />
+    <Resource Include="resources\reset16.png" />
+    <Resource Include="resources\search.png" />
+    <Resource Include="resources\sharetrigger.png" />
+    <Resource Include="resources\sharetriggergroup.png" />
+    <Resource Include="resources\stop16.png" />
+    <Resource Include="resources\stop32.png" />
+    <Resource Include="resources\timeroverlay.png" />
+    <Resource Include="resources\trigger.png" />
+    <Resource Include="resources\triggergroup.png" />
+    <Resource Include="resources\warning.png" />
+    <Resource Include="resources\wrenchlarge.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

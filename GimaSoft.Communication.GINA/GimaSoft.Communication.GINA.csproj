@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C56E7E88-2E5A-4EB3-B0C9-49A63CC91F4C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>GimaSoft.Communication.GINA</RootNamespace>
+    <AssemblyName>GimaSoft.Communication.GINA</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WPFShared">
+      <HintPath>C:\Users\scott\OneDrive\Desktop\GINA\WPFShared.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChunkFailedEventArgs.cs" />
+    <Compile Include="ChunkFailedHandler.cs" />
+    <Compile Include="ChunkTransferredEventArgs.cs" />
+    <Compile Include="ChunkTransferredHandler.cs" />
+    <Compile Include="ConnectionErrorEventArgs.cs" />
+    <Compile Include="ConnectionErrorHandler.cs" />
+    <Compile Include="ConnectionEstablishedEventArgs.cs" />
+    <Compile Include="ConnectionEstablishedHandler.cs" />
+    <Compile Include="ConnectionFailedEventArgs.cs" />
+    <Compile Include="ConnectionFailedHandler.cs" />
+    <Compile Include="ConnectionVersionFailedEventArgs.cs" />
+    <Compile Include="ConnectionVersionFailedHandler.cs" />
+    <Compile Include="ErrorReportUploadedEventArgs.cs" />
+    <Compile Include="ErrorReportUploadedHandler.cs" />
+    <Compile Include="PackageService\IPackageService.cs" />
+    <Compile Include="PackageService\IPackageServiceChannel.cs" />
+    <Compile Include="PackageService\PackageServiceClient.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RepositoryLoadedEventArgs.cs" />
+    <Compile Include="RepositoryLoadedHandler.cs" />
+    <Compile Include="RepositorySubCategoriesLoadedEventArgs.cs" />
+    <Compile Include="RepositorySubCategoriesLoadedHandler.cs" />
+    <Compile Include="TransferCompletedEventArgs.cs" />
+    <Compile Include="TransferCompletedHandler.cs" />
+    <Compile Include="TransferHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GimaSoft.Business.GINA\GimaSoft.Business.GINA.csproj">
+      <Project>{c56e7e88-2e5a-4eb3-b0c9-49a63cc91f4b}</Project>
+      <Name>GimaSoft.Business.GINA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GimaSoft.Service.GINA\GimaSoft.Service.GINA.csproj">
+      <Project>{c56e7e88-2e5a-4eb3-b0c9-49a63cc91f4d}</Project>
+      <Name>GimaSoft.Service.GINA</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

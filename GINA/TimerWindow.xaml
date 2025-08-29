@@ -1,0 +1,504 @@
+<Window
+	x:Class="GimaSoft.GINA.TimerWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:local="clr-namespace:GimaSoft.GINA"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:extToolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit/extended"
+	xmlns:biz="clr-namespace:GimaSoft.Business.GINA;assembly=GimaSoft.Business.GINA"
+	xmlns:shared="clr-namespace:WPFShared;assembly=WPFShared"
+	Height="400"
+	Width="600"
+	ShowInTaskbar="False"
+	AllowsTransparency="True"
+	WindowStyle="None"
+	Topmost="True"
+	Background="#00FFFFFF"
+	VerticalContentAlignment="Stretch"
+	VerticalAlignment="Center"
+	Visibility="{Binding Path=App.Configuration.EnableTimers, Converter='{StaticResource ConverterBooleanToVisibility}', FallbackValue=Visible}"
+	Loaded="Window_Loaded">
+	<FrameworkElement.Resources>
+		<ResourceDictionary>
+			<shared:EnumDisplayConverter
+				x:Key="TimerSortMethods"
+				Type="{x:Type biz:TimerSortMethod}" />
+		</ResourceDictionary>
+	</FrameworkElement.Resources>
+	<Grid
+		Tag="{Binding Path=BackgroundFill}">
+		<Panel.Background>
+			<SolidColorBrush>
+				<SolidColorBrush.Color>
+					<MultiBinding
+						Converter="{StaticResource ConverterColorTransition}">
+						<Binding
+							Path="Tag"
+							RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type Grid}}" />
+						<Binding
+							Path="Behavior.BackgroundFadedColor" />
+						<Binding
+							Path="Behavior.BackgroundColor" />
+					</MultiBinding>
+				</SolidColorBrush.Color>
+			</SolidColorBrush>
+		</Panel.Background>
+		<FrameworkElement.Style>
+			<Style
+				TargetType="{x:Type Grid}">
+				<Style.Triggers>
+					<DataTrigger
+						Value="False"
+						Binding="{Binding Path=ShowFullBackground}">
+						<TriggerBase.EnterActions>
+							<BeginStoryboard>
+								<Storyboard>
+									<DoubleAnimation
+										Storyboard.TargetProperty="Tag"
+										From="1.0"
+										To="0.0"
+										FillBehavior="Stop"
+										Duration="0:0:0.25" />
+								</Storyboard>
+							</BeginStoryboard>
+						</TriggerBase.EnterActions>
+					</DataTrigger>
+					<DataTrigger
+						Value="True"
+						Binding="{Binding Path=ShowFullBackground}">
+						<TriggerBase.EnterActions>
+							<BeginStoryboard>
+								<Storyboard>
+									<DoubleAnimation
+										Storyboard.TargetProperty="Tag"
+										RepeatBehavior="1x"
+										From="0.0"
+										To="1.00"
+										FillBehavior="Stop"
+										Duration="0:0:0.25" />
+								</Storyboard>
+							</BeginStoryboard>
+						</TriggerBase.EnterActions>
+					</DataTrigger>
+				</Style.Triggers>
+			</Style>
+		</FrameworkElement.Style>
+		<Grid
+			Background="#00FFFFFF"
+			VerticalAlignment="Top"
+			HorizontalAlignment="Stretch">
+			<ListView
+				x:Name="icTexts"
+				BorderThickness="0"
+				Background="#00FFFFFF"
+				ScrollViewer.VerticalScrollBarVisibility="Hidden"
+				ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Bottom"
+				VerticalContentAlignment="Top"
+				HorizontalContentAlignment="Stretch"
+				ItemsSource="{Binding Path=Behavior.Matches}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Grid
+							VerticalAlignment="Top">
+							<Grid.RowDefinitions>
+								<RowDefinition
+									Height="Auto" />
+							</Grid.RowDefinitions>
+							<FrameworkElement.Resources>
+								<ResourceDictionary>
+									<Style
+										x:Key="{x:Type ProgressBar}"
+										TargetType="{x:Type ProgressBar}">
+										<Setter
+											Property="Template">
+											<Setter.Value>
+												<ControlTemplate
+													TargetType="{x:Type ProgressBar}">
+													<Grid
+														MinHeight="14"
+														MinWidth="200"
+														Background="{TemplateBinding Control.Background}">
+														<Border
+															x:Name="PART_Track"
+															CornerRadius="2"
+															BorderThickness="1" />
+														<Border
+															x:Name="PART_Indicator"
+															CornerRadius="2"
+															BorderThickness="1"
+															HorizontalAlignment="Left"
+															Background="{TemplateBinding Control.Foreground}"
+															Margin="0,-1,0,1" />
+													</Grid>
+												</ControlTemplate>
+											</Setter.Value>
+										</Setter>
+										<Setter
+											Property="Background">
+											<Setter.Value>
+												<LinearGradientBrush
+													EndPoint="0,1"
+													StartPoint="0,0">
+													<GradientStop
+														Offset="0"
+														Color="{Binding ElementName=icTexts, Path=DataContext.Behavior.BackgroundColor}" />
+													<GradientStop
+														Offset="0.1"
+														Color="{Binding ElementName=icTexts, Path=DataContext.Behavior.EmptyBarColor}" />
+													<GradientStop
+														Offset="0.9"
+														Color="{Binding ElementName=icTexts, Path=DataContext.Behavior.EmptyBarColor}" />
+													<GradientStop
+														Offset="1"
+														Color="{Binding ElementName=icTexts, Path=DataContext.Behavior.BackgroundColor}" />
+												</LinearGradientBrush>
+											</Setter.Value>
+										</Setter>
+										<Setter
+											Property="Foreground">
+											<Setter.Value>
+												<LinearGradientBrush
+													EndPoint="0,1"
+													StartPoint="0,0">
+													<GradientStop
+														Offset="0"
+														Color="{Binding ElementName=icTexts, Path=DataContext.Behavior.BackgroundColor}" />
+													<GradientStop
+														Offset="0.1"
+														Color="{Binding Path=TriggerFilter.TimerStyle.TimerBarColor}" />
+													<GradientStop
+														Offset="0.9"
+														Color="{Binding Path=TriggerFilter.TimerStyle.TimerBarColor}" />
+													<GradientStop
+														Offset="1"
+														Color="{Binding ElementName=icTexts, Path=DataContext.Behavior.BackgroundColor}" />
+												</LinearGradientBrush>
+											</Setter.Value>
+										</Setter>
+									</Style>
+								</ResourceDictionary>
+							</FrameworkElement.Resources>
+							<ProgressBar
+								Minimum="0"
+								Maximum="{Binding Path=TotalMilliseconds}"
+								Value="{Binding Path=MillisecondsRemaining, Mode=OneWay}">
+								<UIElement.Visibility>
+									<MultiBinding
+										Converter="{StaticResource ConverterMultipleBooleanToVisibility}">
+										<Binding
+											Path="DataContext.Behavior.StandardizeTimerBars"
+											Converter="{StaticResource ConverterBooleanNegate}"
+											RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}" />
+										<Binding
+											Path="DataContext.Behavior.ShowTimerBar"
+											RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}" />
+									</MultiBinding>
+								</UIElement.Visibility>
+							</ProgressBar>
+							<ProgressBar
+								Minimum="0"
+								Maximum="{Binding Path=DataContext.Behavior.StandardizedTotalMilliseconds, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}"
+								Value="{Binding Path=MillisecondsRemaining, Mode=OneWay}">
+								<UIElement.Visibility>
+									<MultiBinding
+										Converter="{StaticResource ConverterMultipleBooleanToVisibility}">
+										<Binding
+											Path="DataContext.Behavior.StandardizeTimerBars"
+											RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}" />
+										<Binding
+											Path="DataContext.Behavior.ShowTimerBar"
+											RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}" />
+									</MultiBinding>
+								</UIElement.Visibility>
+							</ProgressBar>
+							<StackPanel
+								Orientation="Horizontal"
+								HorizontalAlignment="Left">
+								<TextBlock
+									HorizontalAlignment="Left"
+									Text="{Binding Path=SecondsRemaining, Converter='{StaticResource ConverterSecondsRemainingToString}'}"
+									Width="{Binding Path=DataContext.TimerLabelWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}"
+									FontFamily="{Binding Path=DataContext.Behavior.FontName, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}"
+									FontSize="{Binding Path=DataContext.Behavior.FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}"
+									Foreground="{Binding Path=TriggerFilter.TimerStyle.FontColor}" />
+								<TextBlock
+									HorizontalAlignment="Left"
+									Text="{Binding Path=DisplayText}"
+									FontFamily="{Binding Path=DataContext.Behavior.FontName, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}"
+									FontSize="{Binding Path=DataContext.Behavior.FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ItemsControl}}}"
+									Foreground="{Binding Path=TriggerFilter.TimerStyle.FontColor}" />
+							</StackPanel>
+						</Grid>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ListView>
+		</Grid>
+		<Grid
+			Visibility="{Binding Path=ShowOpaqueWindow, Converter='{StaticResource ConverterBooleanToVisibility}'}">
+			<Rectangle
+				Fill="#40000000"
+				Margin="6"
+				MouseLeftButtonDown="TextBox_MouseLeftButtonDown"
+				MouseMove="ResetCursor" />
+			<Grid
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Stretch">
+				<Grid.RowDefinitions>
+					<RowDefinition />
+					<RowDefinition
+						Height="Auto" />
+				</Grid.RowDefinitions>
+				<Grid
+					Row="1"
+					VerticalAlignment="Bottom"
+					HorizontalAlignment="Stretch"
+					Background="#FF000080"
+					Margin="6"
+					MouseLeftButtonDown="TextBox_MouseLeftButtonDown"
+					MouseMove="ResetCursor">
+					<WrapPanel
+						HorizontalAlignment="Left"
+						Orientation="Horizontal"
+						Margin="0"
+						Height="Auto">
+						<FrameworkElement.Resources>
+							<ResourceDictionary>
+								<Style
+									x:Key="{x:Type StackPanel}"
+									TargetType="{x:Type StackPanel}">
+									<Setter
+										Property="Margin"
+										Value="5 1 5 1" />
+									<Setter
+										Property="StackPanel.Orientation"
+										Value="Horizontal" />
+									<Setter
+										Property="Background">
+										<Setter.Value>
+											<LinearGradientBrush
+												StartPoint="0,0"
+												EndPoint="0,1">
+												<GradientStop
+													Color="#00F0F0"
+													Offset="0" />
+												<GradientStop
+													Color="Navy"
+													Offset="0.2" />
+												<GradientStop
+													Color="Navy"
+													Offset="0.8" />
+												<GradientStop
+													Color="#00F0F0"
+													Offset="1" />
+											</LinearGradientBrush>
+										</Setter.Value>
+									</Setter>
+								</Style>
+								<Style
+									x:Key="{x:Type Label}"
+									TargetType="{x:Type Label}">
+									<Setter
+										Property="Foreground"
+										Value="#FFFFFFFF" />
+								</Style>
+							</ResourceDictionary>
+						</FrameworkElement.Resources>
+						<StackPanel>
+							<Label
+								Content="Font: "
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Top" />
+							<ComboBox
+								Width="100"
+								ItemsSource="{Binding Path=FontNames}"
+								SelectedValue="{Binding Path=Behavior.FontName}" />
+						</StackPanel>
+						<StackPanel>
+							<Label
+								Content="Size: " />
+							<extToolkit:IntegerUpDown
+								Minimum="1"
+								Maximum="200"
+								Width="50"
+								Value="{Binding Path=Behavior.FontSize, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel>
+							<Label
+								Content="Background:" />
+							<extToolkit:ColorPicker
+								ShowAvailableColors="False"
+								ShowRecentColors="True"
+								Width="60"
+								SelectedColor="{Binding Path=Behavior.BackgroundColor, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel>
+							<Label
+								Content="Faded Background:" />
+							<extToolkit:ColorPicker
+								ShowAvailableColors="False"
+								ShowRecentColors="True"
+								Width="60"
+								SelectedColor="{Binding Path=Behavior.BackgroundFadedColor, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel>
+							<Label
+								Content="Show Timer Bar:"
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Top" />
+							<CheckBox
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Bottom"
+								Margin="0,6,0,0"
+								IsChecked="{Binding Path=Behavior.ShowTimerBar, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel
+							Orientation="Horizontal">
+							<Label
+								Content="Empty Bar Color:" />
+							<extToolkit:ColorPicker
+								ShowAvailableColors="False"
+								ShowRecentColors="True"
+								Width="60"
+								SelectedColor="{Binding Path=Behavior.EmptyBarColor, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel>
+							<Label
+								Content="Standardize Timer Bars:"
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Top" />
+							<CheckBox
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Bottom"
+								Margin="0,6,0,0"
+								IsChecked="{Binding Path=Behavior.StandardizeTimerBars, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel>
+							<Label
+								Content="Group By Character: "
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Top" />
+							<CheckBox
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Bottom"
+								Margin="0,6,0,0"
+								IsChecked="{Binding Path=Behavior.GroupByCharacter, Mode=TwoWay}" />
+						</StackPanel>
+						<StackPanel>
+							<Label
+								Content="Sort: "
+								VerticalAlignment="Stretch"
+								VerticalContentAlignment="Top" />
+							<ComboBox
+								Width="100"
+								ItemsSource="{Binding Path=DisplayNames, Source='{StaticResource TimerSortMethods}'}"
+								SelectedValue="{Binding Path=Behavior.SortMethod, Converter='{StaticResource TimerSortMethods}'}" />
+						</StackPanel>
+					</WrapPanel>
+				</Grid>
+				<Grid
+					VerticalAlignment="Center"
+					HorizontalAlignment="Center"
+					Row="0">
+					<TextBox
+						Background="#00FFFFFF"
+						Foreground="#FFFFFF00"
+						Text="{Binding Path=BehaviorName}"
+						FontFamily="{Binding Path=Behavior.Font.Name}"
+						FontSize="{Binding Path=Behavior.Font.Size}">
+						<UIElement.Effect>
+							<DropShadowEffect
+								ShadowDepth="5"
+								Direction="330"
+								Color="Black"
+								Opacity="0.8"
+								BlurRadius="4" />
+						</UIElement.Effect>
+					</TextBox>
+				</Grid>
+				<Button
+					Content="Save"
+					HorizontalAlignment="Right"
+					VerticalAlignment="Top"
+					Margin="0 8 8 2"
+					Command="{Binding Path=SaveWindowCommand}" />
+			</Grid>
+			<Rectangle
+				x:Name="top"
+				Fill="#40000000"
+				VerticalAlignment="Top"
+				Height="6"
+				Margin="6,0,6,0"
+				Stroke="{x:Null}"
+				PreviewMouseDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+			<Rectangle
+				x:Name="bottom"
+				Fill="#40000000"
+				Height="6"
+				VerticalAlignment="Bottom"
+				Margin="6,0,6,0"
+				Stroke="{x:Null}"
+				PreviewMouseDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+			<Rectangle
+				x:Name="left"
+				Fill="#40000000"
+				HorizontalAlignment="Left"
+				Margin="0,6,0,6"
+				Width="6"
+				Stroke="{x:Null}"
+				PreviewMouseDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+			<Rectangle
+				x:Name="right"
+				Fill="#40000000"
+				Margin="0,6,0,6"
+				Width="6"
+				HorizontalAlignment="Right"
+				Stroke="{x:Null}"
+				PreviewMouseDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+			<Rectangle
+				x:Name="bottomLeft"
+				Fill="#40000000"
+				HorizontalAlignment="Left"
+				VerticalAlignment="Bottom"
+				Width="6"
+				Height="6"
+				Stroke="{x:Null}"
+				PreviewMouseDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+			<Rectangle
+				x:Name="bottomRight"
+				Fill="#40000000"
+				VerticalAlignment="Bottom"
+				Height="6"
+				Width="6"
+				HorizontalAlignment="Right"
+				Stroke="{x:Null}"
+				PreviewMouseDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+			<Rectangle
+				x:Name="topRight"
+				Fill="#40000000"
+				HorizontalAlignment="Right"
+				Width="6"
+				Height="6"
+				VerticalAlignment="Top"
+				Stroke="{x:Null}"
+				PreviewMouseDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+			<Rectangle
+				x:Name="topLeft"
+				Fill="#40000000"
+				HorizontalAlignment="Left"
+				Width="6"
+				VerticalAlignment="Top"
+				Height="6"
+				Stroke="{x:Null}"
+				PreviewMouseLeftButtonDown="Resize"
+				MouseMove="DisplayResizeCursor" />
+		</Grid>
+	</Grid>
+</Window>
