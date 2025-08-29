@@ -15,20 +15,25 @@ namespace GimaSoft.Business.GINA
     // Token: 0x02000036 RID: 54
     public class Package : BindableObject
     {
-        // Token: 0x170000CD RID: 205
-        // (get) Token: 0x0600025D RID: 605 RVA: 0x0000B9AA File Offset: 0x00009BAA
-        public static ObservableCollection<ShareDetectedEventArgs> SharesDetected => Package._SharesDetected;
+        private static readonly Regex EverquestAudioTriggerRegex =
+            new Regex(Configuration.EverquestTriggerFileRegex, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
 
-        // Token: 0x170000CE RID: 206
-        // (get) Token: 0x0600025E RID: 606 RVA: 0x0000B9B1 File Offset: 0x00009BB1
-        public static ObservableCollection<ShareDetectedEventArgs> SharesProcessed => Package._SharesProcessed;
+        public Package()
+        {
+            MediaFiles = new List<PrerecordedFile>();
+        }
 
-        // Token: 0x170000CF RID: 207
-        // (get) Token: 0x0600025F RID: 607 RVA: 0x0000B9B8 File Offset: 0x00009BB8
-        public static ObservableCollection<Guid> SharesCreated => Package._SharesCreated;
+        #region Public static observable collections
+        public static ObservableCollection<ShareDetectedEventArgs> SharesDetected { get; } = new ObservableCollection<ShareDetectedEventArgs>();
+        public static ObservableCollection<ShareDetectedEventArgs> SharesProcessed { get; } = new ObservableCollection<ShareDetectedEventArgs>();
+        public static ObservableCollection<Guid> SharesCreated { get; } = new ObservableCollection<Guid>();
+        #endregion
 
-        // Token: 0x06000260 RID: 608 RVA: 0x0000BA58 File Offset: 0x00009C58
-        private static IEnumerable<Package.PrerecordedFile> GetFiles(IEnumerable<TriggerGroup> groups, IEnumerable<Trigger> triggers)
+        public TriggerGroup RootGroup { get; } = new TriggerGroup();
+        public List<PrerecordedFile> MediaFiles { get; set; }
+
+
+        private static IEnumerable<PrerecordedFile> GetFiles(IEnumerable<TriggerGroup> groups, IEnumerable<Trigger> triggers)
         {
             var list = new List<Trigger>();
             var list2 = new List<Package.PrerecordedFile>();
@@ -66,170 +71,180 @@ namespace GimaSoft.Business.GINA
             return list2;
         }
 
-        // Token: 0x06000261 RID: 609 RVA: 0x0000BC8C File Offset: 0x00009E8C
         private static TriggerGroup EnsurePackageGroup(Package pkg, TriggerGroup group)
         {
             if (group == null)
             {
                 return null;
             }
+
             var stack = new Stack<TriggerGroup>();
             while (group.ParentGroup != null)
             {
                 stack.Push(group);
                 group = group.ParentGroup;
             }
-            var triggerGroup = pkg.RootGroup;
-            while (stack.Any<TriggerGroup>())
+
+            var current = pkg.RootGroup;
+            while (stack.Any())
             {
-                group = stack.Pop();
-                var triggerGroup2 = triggerGroup.Groups.FirstOrDefault((TriggerGroup o) => string.Compare(o.Name, group.Name, true) == 0);
-                if (triggerGroup2 == null)
+                var next = stack.Pop();
+                var existing = current.Groups.FirstOrDefault(o => string.Equals(o.Name, next.Name, StringComparison.OrdinalIgnoreCase));
+                if (existing == null)
                 {
-                    triggerGroup2 = triggerGroup.AddGroup(group.CloneShallow(), null);
+                    existing = current.AddGroup(next.CloneShallow(), null);
                 }
-                triggerGroup = triggerGroup2;
+                current = existing;
             }
-            return triggerGroup;
+
+            return current;
         }
 
-        // Token: 0x06000262 RID: 610 RVA: 0x0000BD90 File Offset: 0x00009F90
         public static Package CreatePackage(IEnumerable<ITriggerLibraryEntry> entries)
         {
-            if (entries == null || !entries.Any<ITriggerLibraryEntry>())
+            if (entries == null || !entries.Any())
             {
                 return null;
             }
+
             if (entries.Any((ITriggerLibraryEntry o) => !(o is Trigger) && !(o is TriggerGroup)))
             {
                 throw new NotSupportedException("This method only works with TriggerGroup and Trigger objects.");
             }
-            var package = new Package
+
+            var pkg = new Package
             {
-                MediaFiles = Package.GetFiles(entries.Where((ITriggerLibraryEntry o) => o is TriggerGroup).Cast<TriggerGroup>(), entries.Where((ITriggerLibraryEntry o) => o is Trigger).Cast<Trigger>()).ToList<Package.PrerecordedFile>()
+                MediaFiles = GetFiles(
+                    entries.Where(o => o is TriggerGroup).Cast<TriggerGroup>(),
+                    entries.Where(o => o is Trigger).Cast<Trigger>()).ToList()
             };
-            foreach (var triggerGroup in entries.Where((ITriggerLibraryEntry o) => o is TriggerGroup).Cast<TriggerGroup>())
+
+            foreach (var group in entries.Where(o => o is TriggerGroup).Cast<TriggerGroup>())
             {
-                var triggerGroup2 = Package.EnsurePackageGroup(package, triggerGroup.ParentGroup);
-                _ = triggerGroup2.AddGroup(triggerGroup.Clone(), null);
-                triggerGroup.Merge(triggerGroup2, true);
+                var parent = EnsurePackageGroup(pkg, group.ParentGroup);
+                var added = parent.AddGroup(group.Clone(), null);
+                group.Merge(added, true);
             }
-            foreach (var trigger in entries.Where((ITriggerLibraryEntry o) => o is Trigger).Cast<Trigger>())
+
+            foreach (var trig in entries.Where(o => o is Trigger).Cast<Trigger>())
             {
-                var triggerGroup3 = Package.EnsurePackageGroup(package, trigger.ParentGroup);
-                _ = triggerGroup3.AddTrigger(trigger.Clone(), null);
+                var parent = EnsurePackageGroup(pkg, trig.ParentGroup);
+                _ = parent.AddTrigger(trig.Clone(), null);
             }
-            return package;
+
+            return pkg;
         }
 
-        // Token: 0x06000263 RID: 611 RVA: 0x0000BF50 File Offset: 0x0000A150
         public static string GetPackagePasteText(Guid sessionId)
         {
-            return string.Format("{{GINA:{0}}}", sessionId.ToString());
+            return $"{{GINA:{sessionId}}}";
         }
 
-        // Token: 0x06000264 RID: 612 RVA: 0x0000C098 File Offset: 0x0000A298
         private static IEnumerable<Trigger> GetTriggersFromEQ(string filename, string triggerSetName)
         {
-            var list = new List<Trigger>();
-            //string text = null;
-            //if (File.Exists(filename))
-            //{
-            //	Package.<>c__DisplayClass28 CS$<>8__locals1 = new Package.<>c__DisplayClass28();
-            //	using (StreamReader streamReader = new StreamReader(filename))
-            //	{
-            //		text = streamReader.ReadToEnd();
-            //	}
-            //	List<Package.EverquestMetadata> list2 = new List<Package.EverquestMetadata>();
-            //	string text2 = Path.ChangeExtension(filename, Configuration.EverquestMetadataExtension);
-            //	try
-            //	{
-            //		XmlDocument xmlDocument = new XmlDocument();
-            //		xmlDocument.SafeLoad(text2);
-            //		XmlNodeList xmlNodeList = xmlDocument.SelectNodes("/Metadata/Triggers/Trigger");
-            //		foreach (XmlElement xmlElement in xmlNodeList.Cast<XmlElement>())
-            //		{
-            //			list2.Add(new Package.EverquestMetadata
-            //			{
-            //				Name = xmlElement.GetElementValue("Name", null),
-            //				ID = xmlElement.GetElementValue("ID", 0),
-            //				Pattern = xmlElement.GetElementValue("Pattern", null)
-            //			});
-            //		}
-            //	}
-            //	catch
-            //	{
-            //	}
-            //	CS$<>8__locals1.matches = Package.EverquestAudioTriggerRegex.Matches(text).Cast<Match>();
-            //	using (IEnumerator<Match> enumerator2 = CS$<>8__locals1.matches.GetEnumerator())
-            //	{
-            //		while (enumerator2.MoveNext())
-            //		{
-            //			Package.<>c__DisplayClass2b CS$<>8__locals2 = new Package.<>c__DisplayClass2b();
-            //			CS$<>8__locals2.CS$<>8__locals29 = CS$<>8__locals1;
-            //			CS$<>8__locals2.match = enumerator2.Current;
-            //			Trigger trig = new Trigger
-            //			{
-            //				Name = CS$<>8__locals2.match.Groups["pattern"].Value,
-            //				TriggerText = CS$<>8__locals2.match.Groups["pattern"].Value,
-            //				MediaFileName = Path.Combine(Configuration.Current.EverquestFolder, "AudioTriggers", triggerSetName, CS$<>8__locals2.match.Groups["sound"].Value) + ".wav",
-            //				PlayMediaFile = true
-            //			};
-            //			Package.EverquestMetadata everquestMetadata = list2.FirstOrDefault((Package.EverquestMetadata o) => o.Pattern.ToLower() == trig.TriggerText.ToLower());
-            //			if (everquestMetadata == null)
-            //			{
-            //				everquestMetadata = (from o in list2
-            //					where o.Pattern.ToLower().Contains(trig.TriggerText.ToLower()) || trig.TriggerText.ToLower().Contains(o.Pattern.ToLower())
-            //					where !CS$<>8__locals2.CS$<>8__locals29.matches.Any((Match n) => n != CS$<>8__locals2.match && n.Groups["pattern"].Value.ToLower() == o.Pattern.ToLower())
-            //					select o).FirstOrDefault<Package.EverquestMetadata>();
-            //			}
-            //			if (everquestMetadata != null)
-            //			{
-            //				trig.Name = everquestMetadata.Name;
-            //				list2.Remove(everquestMetadata);
-            //			}
-            //			list.Add(trig);
-            //		}
-            //	}
-            //}
-            return list;
-        }
-
-        // Token: 0x06000265 RID: 613 RVA: 0x0000C390 File Offset: 0x0000A590
-        private static void WriteEQMetadataFile(string filename, IEnumerable<Package.EverquestMetadata> metadata)
-        {
-            var xmlDocument = new XmlDocument();
-            _ = xmlDocument.AppendChild(xmlDocument.CreateXmlDeclaration("1.0", null, null));
-            var xmlElement = xmlDocument.CreateElement("Metadata");
-            _ = xmlDocument.AppendChild(xmlElement);
-            _ = xmlElement.AppendChild(xmlDocument.NewElement("LastGINAWrite", DateTime.Now.ToString()));
-            var xmlElement2 = xmlDocument.CreateElement("Triggers");
-            _ = xmlElement.AppendChild(xmlElement2);
-            foreach (var everquestMetadata in metadata)
+            var result = new List<Trigger>();
+            if (!File.Exists(filename))
             {
-                var xmlElement3 = xmlDocument.CreateElement("Trigger");
-                _ = xmlElement3.AppendChild(xmlDocument.NewElement("Name", everquestMetadata.Name));
-                _ = xmlElement3.AppendChild(xmlDocument.NewElement("ID", everquestMetadata.ID));
-                _ = xmlElement3.AppendChild(xmlDocument.NewElement("Pattern", everquestMetadata.Pattern));
-                _ = xmlElement2.AppendChild(xmlElement3);
+                return result;
             }
-            xmlDocument.Save(Path.ChangeExtension(filename, Configuration.EverquestMetadataExtension));
+
+            string text;
+            using (var sr = new StreamReader(filename))
+            {
+                text = sr.ReadToEnd();
+            }
+
+            // Load optional metadata file
+            var metadata = new List<EverquestMetadata>();
+            var metadataPath = Path.ChangeExtension(filename, Configuration.EverquestMetadataExtension);
+            try
+            {
+                var xdoc = new XmlDocument();
+                xdoc.SafeLoad(metadataPath);
+                foreach (var el in xdoc.SelectNodes("/Metadata/Triggers/Trigger").Cast<XmlElement>())
+                {
+                    metadata.Add(new EverquestMetadata
+                    {
+                        Name = el.GetElementValue("Name", null),
+                        ID = el.GetElementValue("ID", 0),
+                        Pattern = el.GetElementValue("Pattern", null)
+                    });
+                }
+            }
+            catch
+            {
+                // ignore missing/invalid metadata
+            }
+
+            foreach (Match m in EverquestAudioTriggerRegex.Matches(text))
+            {
+                var trig = new Trigger
+                {
+                    Name = m.Groups["pattern"].Value,
+                    TriggerText = m.Groups["pattern"].Value,
+                    MediaFileName = Path.Combine(Configuration.Current.EverquestFolder, "AudioTriggers", triggerSetName, m.Groups["sound"].Value) + ".wav",
+                    PlayMediaFile = true
+                };
+
+                // Try to find friendly name from metadata by exact or unique contains match
+                var meta = metadata.FirstOrDefault(o => string.Equals(o.Pattern, trig.TriggerText, StringComparison.OrdinalIgnoreCase));
+                if (meta == null)
+                {
+                    meta = metadata
+                        .Where(o => o.Pattern != null &&
+                                    (o.Pattern.IndexOf(trig.TriggerText, StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                     trig.TriggerText.IndexOf(o.Pattern, StringComparison.OrdinalIgnoreCase) >= 0))
+                        .FirstOrDefault(o => !EverquestAudioTriggerRegex.Matches(text).Cast<Match>()
+                            .Any(n => n != m && string.Equals(n.Groups["pattern"].Value, o.Pattern, StringComparison.OrdinalIgnoreCase)));
+                }
+
+                if (meta != null)
+                {
+                    trig.Name = meta.Name;
+                    _ = metadata.Remove(meta);
+                }
+
+                result.Add(trig);
+            }
+
+            return result;
         }
 
-        // Token: 0x06000266 RID: 614 RVA: 0x0000C4B8 File Offset: 0x0000A6B8
+        private static void WriteEQMetadataFile(string filename, IEnumerable<EverquestMetadata> metadata)
+        {
+            var xdoc = new XmlDocument();
+            _ = xdoc.AppendChild(xdoc.CreateXmlDeclaration("1.0", null, null));
+            var root = xdoc.CreateElement("Metadata");
+            _ = xdoc.AppendChild(root);
+            _ = root.AppendChild(xdoc.NewElement("LastGINAWrite", DateTime.Now.ToString()));
+
+            var triggersEl = xdoc.CreateElement("Triggers");
+            _ = root.AppendChild(triggersEl);
+
+            foreach (var md in metadata)
+            {
+                var t = xdoc.CreateElement("Trigger");
+                _ = t.AppendChild(xdoc.NewElement("Name", md.Name));
+                _ = t.AppendChild(xdoc.NewElement("ID", md.ID));
+                _ = t.AppendChild(xdoc.NewElement("Pattern", md.Pattern));
+                _ = triggersEl.AppendChild(t);
+            }
+
+            xdoc.Save(Path.ChangeExtension(filename, Configuration.EverquestMetadataExtension));
+        }
+
         public static Package OpenPackageFromEQTriggers(string filename, string triggerSetName)
         {
-            var package = new Package();
-            var triggerGroup = package.RootGroup.AddGroup(triggerSetName, null);
-            var triggersFromEQ = Package.GetTriggersFromEQ(filename, triggerSetName);
-            foreach (var trigger in triggersFromEQ)
+            var pkg = new Package();
+            var group = pkg.RootGroup.AddGroup(triggerSetName, null);
+            foreach (var trig in GetTriggersFromEQ(filename, triggerSetName))
             {
-                _ = triggerGroup.AddTrigger(trigger, null);
+                _ = group.AddTrigger(trig, null);
             }
-            return package;
+
+            return pkg;
         }
 
-        // Token: 0x06000267 RID: 615 RVA: 0x0000C600 File Offset: 0x0000A800
         public static void SaveTriggersToEQTriggers(IEnumerable<Package.EQCharacterTriggerSet> characters, IEnumerable<Trigger> triggers)
         {
             var list = characters.Select((Package.EQCharacterTriggerSet o) => o.TriggerSet).Distinct<string>().ToList<string>();
@@ -356,7 +371,6 @@ namespace GimaSoft.Business.GINA
             }
         }
 
-        // Token: 0x06000268 RID: 616 RVA: 0x0000CCC4 File Offset: 0x0000AEC4
         public static void CreateGamTextTriggerFile(string fileName, IEnumerable<Trigger> triggers)
         {
             using (var streamWriter = new StreamWriter(fileName, false))
@@ -372,43 +386,48 @@ namespace GimaSoft.Business.GINA
             }
         }
 
-        // Token: 0x06000269 RID: 617 RVA: 0x0000CD40 File Offset: 0x0000AF40
         public static Package OpenPackageFromGamTextTriggers(string filename)
         {
-            var package = new Package();
-            var triggerGroup = package.RootGroup.AddGroup("GamTextTriggers", null);
-            var text = Path.Combine(Path.GetDirectoryName(filename), "Sound Files");
-            var array = File.ReadAllLines(filename);
-            foreach (var text2 in array)
+            var pkg = new Package();
+            var group = pkg.RootGroup.AddGroup("GamTextTriggers", null);
+            var soundRoot = Path.Combine(Path.GetDirectoryName(filename) ?? string.Empty, "Sound Files");
+
+            foreach (var line in File.ReadAllLines(filename))
             {
-                var trigger = Trigger.CreateFromGamTextTriggerString(text2);
-                if (trigger != null)
+                var trig = Trigger.CreateFromGamTextTriggerString(line);
+                if (trig == null)
                 {
-                    trigger.Name = triggerGroup.GetUniqueTriggerName(trigger);
-                    _ = triggerGroup.AddTrigger(trigger, null);
-                    try
+                    continue;
+                }
+
+                trig.Name = group.GetUniqueTriggerName(trig);
+                _ = group.AddTrigger(trig, null);
+
+                try
+                {
+                    if (trig.PlayMediaFile && !string.IsNullOrWhiteSpace(trig.MediaFileName))
                     {
-                        if (trigger.PlayMediaFile && !string.IsNullOrWhiteSpace(trigger.MediaFileName))
+                        var src = Path.Combine(soundRoot, trig.MediaFileName);
+                        var dest = Path.Combine(Configuration.Current.ImportedMediaFileFolder, trig.MediaFileName);
+
+                        if (File.Exists(src) && !File.Exists(dest))
                         {
-                            var text3 = Path.Combine(text, trigger.MediaFileName);
-                            var text4 = Path.Combine(Configuration.Current.ImportedMediaFileFolder, trigger.MediaFileName);
-                            if (File.Exists(text3) && !File.Exists(text4))
-                            {
-                                File.Copy(text3, text4);
-                            }
-                            if (File.Exists(text4))
-                            {
-                                trigger.MediaFileName = text4;
-                            }
+                            _ = Directory.CreateDirectory(Path.GetDirectoryName(dest));
+                            File.Copy(src, dest);
+                        }
+                        if (File.Exists(dest))
+                        {
+                            trig.MediaFileName = dest;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Configuration.LogDebug("Error copying files from GamTextTriggers folder: {0}", new object[] { ex.ToString() });
-                    }
+                }
+                catch (Exception ex)
+                {
+                    Configuration.LogDebug("Error copying files from GamTextTriggers folder: {0}", ex.ToString());
                 }
             }
-            return package;
+
+            return pkg;
         }
 
         // Token: 0x0600026A RID: 618 RVA: 0x0000CEA4 File Offset: 0x0000B0A4
@@ -453,78 +472,58 @@ namespace GimaSoft.Business.GINA
             return package;
         }
 
-        // Token: 0x0600026B RID: 619 RVA: 0x0000D12C File Offset: 0x0000B32C
         public static void AddDetectedShare(ShareDetectedEventArgs args)
         {
-            if (!Package.SharesDetected.Any((ShareDetectedEventArgs o) => o.SessionId == args.SessionId) && !Package.SharesProcessed.Any((ShareDetectedEventArgs o) => o.SessionId == args.SessionId) && !Package.SharesCreated.Any((Guid o) => o == args.SessionId))
+            if (!SharesDetected.Any(o => o.SessionId == args.SessionId)
+                && !SharesProcessed.Any(o => o.SessionId == args.SessionId)
+                && !SharesCreated.Any(o => o == args.SessionId))
             {
-                Package.SharesDetected.Add(args);
+                SharesDetected.Add(args);
             }
         }
 
-        // Token: 0x0600026C RID: 620 RVA: 0x0000D19E File Offset: 0x0000B39E
         public static void AddCreatedShare(Guid sessionId)
         {
-            if (!Package.SharesCreated.Contains(sessionId))
+            if (!SharesCreated.Contains(sessionId))
             {
-                Package.SharesCreated.Add(sessionId);
+                SharesCreated.Add(sessionId);
             }
         }
 
-        // Token: 0x0600026D RID: 621 RVA: 0x0000D1E0 File Offset: 0x0000B3E0
         public static void MarkProcessedShare(ShareDetectedEventArgs args)
         {
-            if (args.ShareType != PackageShareType.Repository && args.SessionId != Guid.Empty && !Package.SharesProcessed.Any((ShareDetectedEventArgs o) => args.SessionId == args.SessionId))
+            if (args.ShareType != PackageShareType.Repository
+                && args.SessionId != Guid.Empty
+                && !SharesProcessed.Any(o => o.SessionId == args.SessionId))
             {
-                Package.SharesProcessed.Add(args);
+                SharesProcessed.Add(args);
             }
-            _ = Package.SharesDetected.Remove(args);
+            _ = SharesDetected.Remove(args);
         }
 
-        // Token: 0x0600026E RID: 622 RVA: 0x0000D274 File Offset: 0x0000B474
         public static void DiscardShare(Guid sessionId)
         {
-            var shareDetectedEventArgs = Package.SharesDetected.FirstOrDefault((ShareDetectedEventArgs o) => o.SessionId == sessionId);
-            if (shareDetectedEventArgs != null)
+            var found = SharesDetected.FirstOrDefault(o => o.SessionId == sessionId);
+            if (found != null)
             {
-                _ = Package.SharesDetected.Remove(shareDetectedEventArgs);
+                _ = SharesDetected.Remove(found);
             }
         }
 
-        // Token: 0x0600026F RID: 623 RVA: 0x0000D2B4 File Offset: 0x0000B4B4
         public static void OpenRepository()
         {
-            Package.SharesDetected.Insert(0, new ShareDetectedEventArgs(PackageShareType.Repository, Guid.Empty, null, null));
+            SharesDetected.Insert(0, new ShareDetectedEventArgs(PackageShareType.Repository, Guid.Empty, null, null));
         }
 
-        // Token: 0x06000270 RID: 624 RVA: 0x0000D2CE File Offset: 0x0000B4CE
         public static void OpenFilePackage(string filename)
         {
-            Package.SharesDetected.Insert(0, new ShareDetectedEventArgs(PackageShareType.GINAPackageFile, Guid.NewGuid(), null, filename));
+            SharesDetected.Insert(0, new ShareDetectedEventArgs(PackageShareType.GINAPackageFile, Guid.NewGuid(), null, filename));
         }
 
-        // Token: 0x06000271 RID: 625 RVA: 0x0000D2E8 File Offset: 0x0000B4E8
         public static void OpenGamTextTriggerFile(string filename)
         {
-            Package.SharesDetected.Insert(0, new ShareDetectedEventArgs(PackageShareType.GamTextTriggersFile, Guid.NewGuid(), null, filename));
+            SharesDetected.Insert(0, new ShareDetectedEventArgs(PackageShareType.GamTextTriggersFile, Guid.NewGuid(), null, filename));
         }
-
-        // Token: 0x06000272 RID: 626 RVA: 0x0000D302 File Offset: 0x0000B502
-        public Package()
-        {
-            MediaFiles = new List<Package.PrerecordedFile>();
-        }
-
-        // Token: 0x170000D0 RID: 208
-        // (get) Token: 0x06000273 RID: 627 RVA: 0x0000D320 File Offset: 0x0000B520
-        public TriggerGroup RootGroup { get; } = new TriggerGroup();
-
-        // Token: 0x170000D1 RID: 209
-        // (get) Token: 0x06000274 RID: 628 RVA: 0x0000D328 File Offset: 0x0000B528
-        // (set) Token: 0x06000275 RID: 629 RVA: 0x0000D330 File Offset: 0x0000B530
-        public List<Package.PrerecordedFile> MediaFiles { get; set; }
-
-        // Token: 0x06000276 RID: 630 RVA: 0x0000D38C File Offset: 0x0000B58C
         public void Merge(Package pkg)
         {
             var count = MediaFiles.Count;
@@ -543,8 +542,6 @@ namespace GimaSoft.Business.GINA
                 triggerGroup.Merge(RootGroup, true);
             }
         }
-
-        // Token: 0x06000277 RID: 631 RVA: 0x0000D4EC File Offset: 0x0000B6EC
         public byte[] GetBytes()
         {
             var xmlDocument = new XmlDocument();
@@ -579,83 +576,29 @@ namespace GimaSoft.Business.GINA
             return array;
         }
 
-        // Token: 0x04000114 RID: 276
-        private static readonly Regex EverquestAudioTriggerRegex = new Regex(Configuration.EverquestTriggerFileRegex, RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-
-        // Token: 0x04000115 RID: 277
-        private static readonly ObservableCollection<ShareDetectedEventArgs> _SharesDetected = new ObservableCollection<ShareDetectedEventArgs>();
-
-        // Token: 0x04000116 RID: 278
-        private static readonly ObservableCollection<ShareDetectedEventArgs> _SharesProcessed = new ObservableCollection<ShareDetectedEventArgs>();
-
-        // Token: 0x04000117 RID: 279
-        private static readonly ObservableCollection<Guid> _SharesCreated = new ObservableCollection<Guid>();
-
-        // Token: 0x02000037 RID: 55
+        #region Nested types
         public class PrerecordedFile
         {
-            // Token: 0x170000D2 RID: 210
-            // (get) Token: 0x06000292 RID: 658 RVA: 0x0000D6C5 File Offset: 0x0000B8C5
-            // (set) Token: 0x06000293 RID: 659 RVA: 0x0000D6CD File Offset: 0x0000B8CD
             public string FullPath { get; set; }
-
-            // Token: 0x170000D3 RID: 211
-            // (get) Token: 0x06000294 RID: 660 RVA: 0x0000D6D6 File Offset: 0x0000B8D6
-            // (set) Token: 0x06000295 RID: 661 RVA: 0x0000D6DE File Offset: 0x0000B8DE
             public string Filename { get; set; }
-
-            // Token: 0x170000D4 RID: 212
-            // (get) Token: 0x06000296 RID: 662 RVA: 0x0000D6E7 File Offset: 0x0000B8E7
-            // (set) Token: 0x06000297 RID: 663 RVA: 0x0000D6EF File Offset: 0x0000B8EF
             public int FileId { get; set; }
-
-            // Token: 0x170000D5 RID: 213
-            // (get) Token: 0x06000298 RID: 664 RVA: 0x0000D6F8 File Offset: 0x0000B8F8
-            // (set) Token: 0x06000299 RID: 665 RVA: 0x0000D700 File Offset: 0x0000B900
             public Guid? OriginalPackageId { get; set; }
-
-            // Token: 0x170000D6 RID: 214
-            // (get) Token: 0x0600029A RID: 666 RVA: 0x0000D709 File Offset: 0x0000B909
-            // (set) Token: 0x0600029B RID: 667 RVA: 0x0000D711 File Offset: 0x0000B911
             public byte[] Data { get; set; }
         }
 
-        // Token: 0x02000038 RID: 56
         public class EQCharacterTriggerSet
         {
-            // Token: 0x170000D7 RID: 215
-            // (get) Token: 0x0600029D RID: 669 RVA: 0x0000D722 File Offset: 0x0000B922
-            // (set) Token: 0x0600029E RID: 670 RVA: 0x0000D72A File Offset: 0x0000B92A
             public string Server { get; set; }
-
-            // Token: 0x170000D8 RID: 216
-            // (get) Token: 0x0600029F RID: 671 RVA: 0x0000D733 File Offset: 0x0000B933
-            // (set) Token: 0x060002A0 RID: 672 RVA: 0x0000D73B File Offset: 0x0000B93B
             public string Character { get; set; }
-
-            // Token: 0x170000D9 RID: 217
-            // (get) Token: 0x060002A1 RID: 673 RVA: 0x0000D744 File Offset: 0x0000B944
-            // (set) Token: 0x060002A2 RID: 674 RVA: 0x0000D74C File Offset: 0x0000B94C
             public string TriggerSet { get; set; }
         }
 
-        // Token: 0x02000039 RID: 57
         private class EverquestMetadata
         {
-            // Token: 0x170000DA RID: 218
-            // (get) Token: 0x060002A4 RID: 676 RVA: 0x0000D75D File Offset: 0x0000B95D
-            // (set) Token: 0x060002A5 RID: 677 RVA: 0x0000D765 File Offset: 0x0000B965
             public string Name { get; set; }
-
-            // Token: 0x170000DB RID: 219
-            // (get) Token: 0x060002A6 RID: 678 RVA: 0x0000D76E File Offset: 0x0000B96E
-            // (set) Token: 0x060002A7 RID: 679 RVA: 0x0000D776 File Offset: 0x0000B976
             public int ID { get; set; }
-
-            // Token: 0x170000DC RID: 220
-            // (get) Token: 0x060002A8 RID: 680 RVA: 0x0000D77F File Offset: 0x0000B97F
-            // (set) Token: 0x060002A9 RID: 681 RVA: 0x0000D787 File Offset: 0x0000B987
             public string Pattern { get; set; }
         }
+        #endregion
     }
 }
