@@ -841,9 +841,7 @@ namespace GimaSoft.Business.GINA
             get => (long)Process.GetCurrentProcess().ProcessorAffinity;
             set
             {
-                value &= Convert.ToInt64(Math.Pow(2.0, Environment.ProcessorCount) - 1.0);
-                Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)value;
-                base.RaisePropertyChanged("ProcessorAffinity");
+
             }
         }
 

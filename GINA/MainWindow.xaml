@@ -2214,10 +2214,7 @@
 			CancelButtonText="No"
 			Visibility="{Binding Path=ShowDeleteTriggerConfirm, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
 			OKButtonCommand="{Binding Path=DeleteTriggerCommand}"
-			CancelButtonCommand="{Binding CancelDeleteCommand}" />
-		<local:ApplicationUpdateControl
-			Visibility="{Binding Path=ShowAppUpdateDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}"
-			UseAutoMode="{Binding Path=UseAutoUpdateMode, Mode=TwoWay}" />
+			CancelButtonCommand="{Binding CancelDeleteCommand}" /> 
 		<local:EverquestTriggerSetSelector
 			Visibility="{Binding Path=ShowEQImportDialog, Mode=TwoWay, Converter='{StaticResource ConverterBooleanToVisibility}'}" />
 		<local:EverquestCharacterSetSelector
