@@ -1052,13 +1052,13 @@ namespace GimaSoft.Business.GINA
 		{
 			GINACharacter ginacharacter = new GINACharacter
 			{
-				Name = element.GetElementValue("Name", null),
-				DisplayName = element.GetElementValue("DisplayName", null),
+				Name = element.GetElementValue<string>("Name", null),
+				DisplayName = element.GetElementValue<string>("DisplayName", null),
 				AutoMonitor = element.GetElementValue("AutoMonitor", false),
 				VoiceName = element.GetElementValue("VoiceName", Configuration.DefaultVoiceName),
 				VoiceSpeed = element.GetElementValue("VoiceSpeed", 0),
 				Volume = element.GetElementValue("Volume", 100),
-				LogFilePath = element.GetElementValue("LogFilePath", null),
+				LogFilePath = element.GetElementValue<string>("LogFilePath", null),
 				LastArchiveDate = element.GetElementValue("LastArchiveDate", DateTime.Today)
 			};
 			ginacharacter.TextStyle.LoadFromXml(element.SelectSingleNode("TextStyle[1]") as XmlElement);

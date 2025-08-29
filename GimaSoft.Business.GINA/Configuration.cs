@@ -333,7 +333,7 @@ namespace GimaSoft.Business.GINA
             {
                 foreach (var xmlElement6 in enumerable)
                 {
-                    var behaviorName = xmlElement6.GetElementValue("Name", null);
+                    var behaviorName = xmlElement6.GetElementValue<string>("Name", null);
                     var behaviorType = xmlElement6.GetElementValue("BehaviorType", BehaviorTypes.Text);
                     var solidColorBrush = new SolidColorBrush(default(Color).SetFromHtml(xmlElement6.GetElementValue("FontColor", "Yellow"), "White"));
                     var color = default(Color).SetFromHtml(xmlElement6.GetElementValue("TimerBarColor", "Maroon"), "White");
@@ -855,7 +855,7 @@ namespace GimaSoft.Business.GINA
             DisplayMatches = element.GetElementValue("DisplayMatches", true);
             MatchDisplayLimit = element.GetElementValue("MatchDisplayLimit", 0);
             LogMatchesToFile = element.GetElementValue("LogMatchesToFile", false);
-            MatchLogFileName = element.GetElementValue("MatchLogFileName", null);
+            MatchLogFileName = element.GetElementValue<string>("MatchLogFileName", null);
             ShareServiceUri = element.GetElementValue("ShareServiceUri", Configuration.DefaultShareServiceUri).Replace("http://", "https://");
             AutoUpdate = element.GetElementValue("AutoUpdate", true);
             ImportedMediaFileFolder = element.GetElementValue("ImportedMediaFileFolder", "");
@@ -874,7 +874,7 @@ namespace GimaSoft.Business.GINA
             EnableDebugLog = element.GetElementValue("EnableDebugLog", false);
             ArchiveLogs = element.GetElementValue("ArchiveLogs", false);
             CompressArchivedLogs = element.GetElementValue("CompressArchivedLogs", false);
-            LogArchiveFolder = element.GetElementValue("LogArchiveFolder", null);
+            LogArchiveFolder = element.GetElementValue<string>("LogArchiveFolder", null);
             LogArchiveMethod = element.GetElementValue("LogArchiveMethod", ArchiveMethods.BySize);
             LogArchiveSchedule = element.GetElementValue("LogArchiveSchedule", ArchiveSchedules.Monthly);
             LogArchiveThresholdSize = element.GetElementValue("LogArchiveThresholdSize", LogArchiveThresholdSize);

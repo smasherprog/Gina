@@ -165,9 +165,9 @@ namespace GimaSoft.Business.GINA
                 {
                     metadata.Add(new EverquestMetadata
                     {
-                        Name = el.GetElementValue("Name", null),
+                        Name = el.GetElementValue<string>("Name", null),
                         ID = el.GetElementValue("ID", 0),
-                        Pattern = el.GetElementValue("Pattern", null)
+                        Pattern = el.GetElementValue<string>("Pattern", null)
                     });
                 }
             }

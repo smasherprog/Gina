@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DA098196-DFB2-4098-8316-02FD6F58158F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>WPFShared</RootNamespace>
+    <AssemblyName>WPFShared</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60DC8134-EBA5-43B8-BCC9-BB4BC16C2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="GalaSoft.MvvmLight.Extras.WPF4">
+      <HintPath>..\GalaSoft.MvvmLight.Extras.WPF4.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Windows.Interactivity">
+      <HintPath>..\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WPFToolkit.Extended">
+      <HintPath>..\WPFToolkit.Extended.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BindableControl.cs" />
+    <Compile Include="BindableItemsControl.cs" />
+    <Compile Include="BindableObject.cs" />
+    <Compile Include="Clipboard.cs" />
+    <Compile Include="ColorExtensions.cs" />
+    <Compile Include="ComboBoxAutoOpenBehavior.cs" />
+    <Compile Include="Converters\BooleanNegateConverter.cs" />
+    <Compile Include="Converters\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\ByteWholeSizeConverter.cs" />
+    <Compile Include="Converters\ColorTransitionConverter.cs" />
+    <Compile Include="Converters\EmptyCollectionToBooleanConverter.cs" />
+    <Compile Include="Converters\EmptyCollectionToVisibilityConverter.cs" />
+    <Compile Include="Converters\EnumToBooleanConverter.cs" />
+    <Compile Include="Converters\EnumToVisibilityConverter.cs" />
+    <Compile Include="Converters\InListToVisibilityConverter.cs" />
+    <Compile Include="Converters\InRangeToBooleanConverter.cs" />
+    <Compile Include="Converters\InRangeToVisibilityConverter.cs" />
+    <Compile Include="Converters\MultipleBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\MultipleObjectConverter.cs" />
+    <Compile Include="Converters\NullToBooleanConverter.cs" />
+    <Compile Include="Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="Converters\SecondsRemainingToStringConverter.cs" />
+    <Compile Include="Converters\StringConcatConverter.cs" />
+    <Compile Include="Converters\StringFormatConverter.cs" />
+    <Compile Include="Converters\StringNullOrEmptyToVisibilityConverter.cs" />
+    <Compile Include="Converters\TestConverter.cs" />
+    <Compile Include="Converters\VisiblityToBooleanConverter.cs" />
+    <Compile Include="DataGridCellSingleClickBehavior.cs" />
+    <Compile Include="DependencyObjectExtensions.cs" />
+    <Compile Include="DialogEditor.cs" />
+    <Compile Include="DialogOverlay.cs" />
+    <Compile Include="EnumDisplayConverter.cs" />
+    <Compile Include="GenericCommand.cs" />
+    <Compile Include="IEnumerableExtensions.cs" />
+    <Compile Include="ITreeItem.cs" />
+    <Compile Include="ITreeItemExtensions.cs" />
+    <Compile Include="ListViewSizeColumnsBehavior.cs" />
+    <Compile Include="MemoryStreamExtensions.cs" />
+    <Compile Include="Microsoft\Shell\ISingleInstanceApp.cs" />
+    <Compile Include="Microsoft\Shell\NativeMethods.cs" />
+    <Compile Include="Microsoft\Shell\SingleInstance.cs" />
+    <Compile Include="Microsoft\Shell\WM.cs" />
+    <Compile Include="ObservableCollectionExt.cs" />
+    <Compile Include="Operands.cs" />
+    <Compile Include="OperandsExtensions.cs" />
+    <Compile Include="POINT.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <DependentUpon>Settings.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="RECT.cs" />
+    <Compile Include="SetFocus.cs" />
+    <Compile Include="SimpleDialog.cs" />
+    <Compile Include="TimeSpanPicker.cs" />
+    <Compile Include="TreeCollection.cs" />
+    <Compile Include="TreeList.cs" />
+    <Compile Include="TreeListItem.cs" />
+    <Compile Include="TreeNode.cs" />
+    <Compile Include="TreeViewDragBehavior.cs" />
+    <Compile Include="TreeViewDropBehavior.cs" />
+    <Compile Include="TreeViewExtensions.cs" />
+    <Compile Include="TreeViewItemDropBehavior.cs" />
+    <Compile Include="UniqueNameGenerator.cs" />
+    <Compile Include="WindowExtensions.cs" />
+    <Compile Include="WINDOWPLACEMENT.cs" />
+    <Compile Include="XmlExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resources" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="sharedresources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="styles\editorstyles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="themes\generic.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="resources\spinnerdown.png" />
+    <Resource Include="resources\spinnerup.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

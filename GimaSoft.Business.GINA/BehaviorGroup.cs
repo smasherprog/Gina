@@ -60,7 +60,7 @@ namespace GimaSoft.Business.GINA
         {
             get
             {
-                var behaviorGroup = BehaviorGroup.All.SingleOrDefault((BehaviorGroup o) => o.BehaviorType == BehaviorTypes.Text && o.Name.ToLower() == "default");
+                var behaviorGroup = BehaviorGroup.All.SingleOrDefault((BehaviorGroup o) => o.BehaviorType == BehaviorTypes.Text && o.Name?.ToLower() == "default");
                 BehaviorGroup behaviorGroup2;
                 if ((behaviorGroup2 = behaviorGroup) == null)
                 {
@@ -464,7 +464,6 @@ namespace GimaSoft.Business.GINA
                                     }
                                     goto IL_02E3;
                                 }
-                                break;
                             }
                         default:
                             goto IL_02E3;
@@ -591,7 +590,7 @@ namespace GimaSoft.Business.GINA
             var behaviorGroup = new BehaviorGroup
             {
                 BehaviorType = element.GetElementValue("BehaviorType", BehaviorTypes.Text),
-                Name = element.GetElementValue("Name", null),
+                Name = element.GetElementValue<string>("Name", "Default"),
                 FontName = element.GetElementValue("FontName", "Arial"),
                 FontSize = element.GetElementValue("FontSize", 50),
                 GroupByCharacter = element.GetElementValue("GroupByCharacter", true),

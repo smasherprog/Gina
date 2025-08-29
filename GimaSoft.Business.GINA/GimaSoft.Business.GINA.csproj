@@ -45,9 +45,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
-    <Reference Include="WPFShared">
-      <HintPath>C:\Users\scott\OneDrive\Desktop\GINA\WPFShared.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <AppDesigner Include="Properties\" />
@@ -61,7 +58,6 @@
     <Compile Include="BehaviorStyle.cs" />
     <Compile Include="BehaviorTypes.cs" />
     <Compile Include="CharacterCategory.cs" />
-    <Compile Include="XmlHelper.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="ConfigurationLoadResult.cs" />
     <Compile Include="CustomTextFormatterDelegate.cs" />
@@ -107,8 +103,13 @@
       <Project>{c56e7e88-2e5a-4eb3-b0c9-49a63cc91f48}</Project>
       <Name>BusinessShared</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WPFShared\WPFShared.csproj">
+      <Project>{da098196-dfb2-4098-8316-02fd6f58158f}</Project>
+      <Name>WPFShared</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
